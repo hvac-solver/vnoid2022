@@ -1,0 +1,16 @@
+format: ChoreonoidBody
+formatVersion: 1.0
+name: Floor
+links:
+  -
+    name: Base
+    translation: [ 0, 0, 0 ]
+    jointType: fixed
+    material: Ground
+    elements:
+      Visual:    { resource: { uri: "sample_field.obj" } }
+      Collision: { resource: { uri: "sample_field.obj" } }
+#         geometry: { type: Resource, uri: "sample_field.wrl" }
+#        geometry: { type: Resource, uri: "sample_field.obj" }
+#        geometry: { type: Resource, uri: "sample_field.stl" }
+#        appearance: { material: { diffuseColor: [ 0.3, 0.5, 0.5 ] } }

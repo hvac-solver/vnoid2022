@@ -5,7 +5,7 @@ import numpy as np
 
 
 model_info = robotoc.RobotModelInfo()
-model_info.urdf_path = '../sample_robot_description/urdf/sample_robot_reduced.urdf'
+model_info.urdf_path = '../model/sample_robot_description/urdf/sample_robot_reduced.urdf'
 model_info.base_joint_type = robotoc.BaseJointType.FloatingBase
 baumgarte_time_step = 0.05
 model_info.surface_contacts = [robotoc.ContactModelInfo('L_FOOT_R', baumgarte_time_step),
