@@ -9,6 +9,8 @@
 
 #include "Eigen/Core"
 
+#include <vector>
+#include <string>
 #include <memory>
 
 struct FastWalkingParams 
@@ -35,6 +37,9 @@ private:
     cnoid::Body* ioBody_;
     cnoid::ForceSensorPtr LFSensor_;
     cnoid::ForceSensorPtr RFSensor_;
+
+    // actuated joints
+    std::vector<int> jointIds_;
 
     // parameters
     double dt_;

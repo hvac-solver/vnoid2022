@@ -39,8 +39,8 @@ void FastWalkingController::initMPC(const FastWalkingParams& params)
 
     const double X = 0.08;
     const double Y = 0.04;
-    mpc.getContactWrenchConeHandle().setRectangular(X, Y);
-    mpc.getImpactWrenchConeHandle().setRectangular(X, Y);
+    mpc_.getContactWrenchConeHandle()->setRectangular(X, Y);
+    mpc_.getImpactWrenchConeHandle()->setRectangular(X, Y);
 
     const double t0 = 0.0;
     Eigen::VectorXd q0;
@@ -49,9 +49,9 @@ void FastWalkingController::initMPC(const FastWalkingParams& params)
           0, // right sholder
           0, 0, -0.5*params.knee_angle, params.knee_angle, -0.5*params.knee_angle, 0, // left leg
           0, 0, -0.5*params.knee_angle, params.knee_angle, -0.5*params.knee_angle, 0; // right leg
-    robot.forwardKinematics(q0);
-    q0[2] = - 0.5 * (robot.framePposition("L_FOOT_R")[2] + robot.framePosition("R_FOOT_R")[2]);
-    const Eigen::VectorXd v0 = Eigen::VectorXd::Zeros(robot.dimv());
+    robot.updateFrameKinematics(q0);
+    q0[2] = - 0.5 * (robot.framePosition("L_FOOT_R")[2] + robot.framePosition("R_FOOT_R")[2]);
+    const Eigen::VectorXd v0 = Eigen::VectorXd::Zero(robot.dimv());
     robotoc::SolverOptions option_init;
     option_init.max_iter = 200;
     option_init.nthreads = 4;
@@ -64,7 +64,7 @@ void FastWalkingController::initMPC(const FastWalkingParams& params)
 }
 
 
-bool SolverWalkingController::initialize(cnoid::SimpleControllerIO* io)
+bool FastWalkingController::initialize(cnoid::SimpleControllerIO* io)
 {
     // initializes variables
     dt_ = io->timeStep();
@@ -94,11 +94,31 @@ bool SolverWalkingController::initialize(cnoid::SimpleControllerIO* io)
         io->enableOutput(joint);
     }
 
+    // gets the actuated joint ids
+    const std::vector<std::string> actuatedJointNames = {"L_UPPERARM_P",
+                                                         "R_UPPERARM_P",
+                                                         "L_UPPERLEG_Y",
+                                                         "L_UPPERLEG_R",
+                                                         "L_UPPERLEG_P",
+                                                         "L_LOWERLEG_P",
+                                                         "L_FOOT_P",
+                                                         "L_FOOT_R",
+                                                         "R_UPPERLEG_Y",
+                                                         "R_UPPERLEG_R",
+                                                         "R_UPPERLEG_P",
+                                                         "R_LOWERLEG_P",
+                                                         "R_FOOT_P",
+                                                         "R_FOOT_R"};
+    jointIds_.clear();
+    for (const auto& e : actuatedJointNames) {
+        jointIds_.push_back(io->body()->joint(e.c_str())->jointId());
+    }
+
     /*** MPC initialization ***/
     FastWalkingParams params;
     initMPC(params);
 
-    return success;
+    return true;
 }
 
 bool FastWalkingController::start()
@@ -124,44 +144,22 @@ bool FastWalkingController::control()
     Vector6 v_root;
     v_root << R.transpose() * rootLink->v(), R.transpose() * rootLink->w();
 
-    // gets the joint positions and velocities
-    // warning: the order of the left and right leg in Choreonoid
-    //          is DIFFERENT from robotoc framework
-    VectorX q_joint(14);
-    VectorX v_joint(14);
-    constexpr int jointIdLeftSholder  = 1;
-    constexpr int jointIdRightSholder = 1;
-
-    constexpr int jointIdOffsetRightFoot = 18;
-    constexpr int jointIdOffsetLeftFoot = jointIdOffsetRightFoot + 6;
-    for (int jointId = jointIdOffsetRightFoot; jointId < jointIdOffsetRightFoot + 6;
-         ++jointId) {
-        q_joint(jointId - jointIdOffsetRightFoot + 6) = ioBody_->joint(jointId)->q();
-        v_joint(jointId - jointIdOffsetRightRoot + 6) = ioBody_->joint(jointId)->dq();
+    // gets the configuration and generalized velocity
+    VectorX q(jointIds_.size()+7);
+    VectorX v(jointIds_.size()+6);
+    q.template head<7>() << p, r;
+    v.template head<6>() = v_root;
+    for (int i=0; i<jointIds_.size(); ++i) {
+        q.coeffRef(i+7) = ioBody_->joint(jointIds_[i])->q();
+        v.coeffRef(i+6) = ioBody_->joint(jointIds_[i])->dq();
     }
-
-    for (int jointId = jointIdOffsetLeftFoot; jointId < jointIdOffsetLeftFoot + 6;
-         ++jointId) {
-        q_joint(jointId - jointIdOffsetLeftFoot) = ioBody_->joint(jointId)->q();
-        v_joint(jointId - jointIdOffsetLeftFoot) = ioBody_->joint(jointId)->dq();
-    }
-
-    // organizes the position and velocity vectors
-    VectorX q(p.rows() + r.rows() + q_joint.rows());
-    q << p, r, q_joint;
-    VectorX v(v_root.rows() + v_joint.rows());
-    v << v_root, v_joint;
 
     // applies the MPC inputs
-    mpc_.updateSolution(t_, q, v);
+    mpc_.updateSolution(t_, dt_, q, v);
     const auto& u = mpc_.getInitialControlInput();
-    for (int jointId = jointIdOffsetRight; jointId < jointIdOffsetRight + 6;
-         ++jointId) {
-        ioBody_->joint(jointId)->u() = u(jointId - jointIdOffsetRight + 6);
-    }
-    for (int jointId = jointIdOffsetLeft; jointId < jointIdOffsetLeft + 6;
-         ++jointId) {
-        ioBody_->joint(jointId)->u() = u(jointId - jointIdOffsetLeft);
+
+    for (int i=0; i<jointIds_.size(); ++i) {
+        ioBody_->joint(jointIds_[i])->u() = u.coeff(i);
     }
 
     t_ += dt_;
