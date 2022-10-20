@@ -87,10 +87,10 @@ items:
           class: BodyItem
           is_checked: true
           data: 
-            file: "${SHARE}/model/sample_robot/sample_robot_ver2_fixed_upper.body"
+            file: "${SHARE}/model/sample_robot/sample_robot_ver2_reduced.body"
             currentBaseLink: "HIPS"
             format: CHOREONOID-BODY
-            rootPosition: [ 0, 0, 0.75 ]
+            rootPosition: [ 0, 0, 0.78 ]
             rootAttitude: [ 
               1, 0, 0, 
               0, 1, 0, 
@@ -99,8 +99,8 @@ items:
             jointDisplacements: [ 
               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-              -30, 60, -30, 0, 0, 0, -30, 60, -30, 0 ]
-            initialRootPosition: [ 0, 0, 0.75 ]
+              -15, 30, -15, 0, 0, 0, -15, 30, -15, 0 ]
+            initialRootPosition: [ 0, 0, 0.78 ]
             initialRootAttitude: [ 
               1, 0, 0, 
               0, 1, 0, 
@@ -108,7 +108,7 @@ items:
             initialJointPositions: [ 
               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-              -30, 60, -30, 0, 0, 0, -30, 60, -30, 0 ]
+              -15, 30, -15, 0, 0, 0, -15, 30, -15, 0 ]
             staticModel: false
             collisionDetection: true
             selfCollisionDetection: false
@@ -118,13 +118,13 @@ items:
           children: 
             - 
               id: 5
-              name: "SimpleController"
+              name: "FastWalkingController"
               plugin: Body
               class: SimpleControllerItem
               data: 
                 isNoDelayMode: false
                 controllerOptions: ""
-                controller: "solver_walking_controller"
+                controller: "fast_walking_controller"
                 base_directory: "Controller directory"
                 reloading: false
                 export_symbols: false
