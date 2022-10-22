@@ -35,8 +35,6 @@ class FastWalkingController : public cnoid::SimpleController
 private:
     // interfaces for a simulated body
     cnoid::Body* ioBody_;
-    cnoid::ForceSensorPtr LFSensor_;
-    cnoid::ForceSensorPtr RFSensor_;
 
     // actuated joints
     std::vector<int> jointIds_;

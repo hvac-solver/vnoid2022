@@ -14,7 +14,7 @@ using cnoid::VectorX;
 void FastWalkingController::initMPC(const FastWalkingParams& params) 
 {
     robotoc::RobotModelInfo model_info; 
-    model_info.urdf_path = "../model/sample_robot_description/urdf/sample_robot_reduced.urdf";
+    model_info.urdf_path = cnoid::shareDir() + "/model/sample_robot_description/urdf/sample_robot_reduced.urdf";
     model_info.base_joint_type = robotoc::BaseJointType::FloatingBase;
     const double baumgarte_time_step = 0.05;
     model_info.surface_contacts = {robotoc::ContactModelInfo("L_FOOT_R", baumgarte_time_step),
@@ -30,10 +30,10 @@ void FastWalkingController::initMPC(const FastWalkingParams& params)
 
     foot_step_planner_ = std::make_shared<robotoc::BipedWalkFootStepPlanner>(robot);
     if (params.use_raibert) {
-        foot_step_planner_->setGaitPattern(params.step_length, params.step_yaw, (params.double_support_time > 0.));
+        foot_step_planner_->setRaibertGaitPattern(vcom_cmd, yaw_rate_cmd, params.swing_time, params.double_support_time, params.raibert_gain);
     }
     else {
-        foot_step_planner_->setRaibertGaitPattern(vcom_cmd, yaw_rate_cmd, params.swing_time, params.double_support_time, params.raibert_gain);
+        foot_step_planner_->setGaitPattern(params.step_length, params.step_yaw, (params.double_support_time > 0.));
     }
     mpc_.setGaitPattern(foot_step_planner_, params.step_height, params.swing_time, params.double_support_time, params.swing_start_time);
 
@@ -43,7 +43,7 @@ void FastWalkingController::initMPC(const FastWalkingParams& params)
     mpc_.getImpactWrenchConeHandle()->setRectangular(X, Y);
 
     const double t0 = 0.0;
-    Eigen::VectorXd q0;
+    Eigen::VectorXd q0(robot.dimq());
     q0 << 0, 0, 0, 0, 0, 0, 1,
           0, // left sholder
           0, // right sholder
@@ -71,12 +71,6 @@ bool FastWalkingController::initialize(cnoid::SimpleControllerIO* io)
     ioBody_ = io->body();
 
     /*** robot initialization ***/
-
-    // turns sensors on
-    RFSensor_ = ioBody_->findDevice<cnoid::ForceSensor>("rfsensor");
-    LFSensor_ = ioBody_->findDevice<cnoid::ForceSensor>("lfsensor");
-    io->enableInput(RFSensor_);
-    io->enableInput(LFSensor_);
 
     // enable interfaces to get the root link states
     io->enableInput(ioBody_->rootLink(),
@@ -129,10 +123,6 @@ bool FastWalkingController::start()
 
 bool FastWalkingController::control()
 {
-    // gets force sensor values (local)
-    const Vector6 rightWrench = RFSensor_->F();
-    const Vector6 leftWrench = LFSensor_->F();
-
     // gets the root pose
     const cnoid::LinkPtr rootLink = ioBody_->rootLink();
     const Vector3 p = rootLink->p();

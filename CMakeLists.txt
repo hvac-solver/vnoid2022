@@ -30,8 +30,5 @@ target_include_directories(
     ${EIGEN3_INCLUDE_DIR}
 )
 
-install(FILES model/sample_robot_description/urdf/sample_robot_fixed_upper_body.urdf
-              model/sample_robot_description/urdf/sample_robot_reduced.urdf
-              model/sample_robot_description/body/sample_robot_ver2_fixed_upper_body.body
-              model/sample_robot_description/body/sample_robot_ver2_reduced.body
-        DESTINATION ${CNOID_SHARE_SUBDIR}/model/sample_robot)
+install(DIRECTORY model DESTINATION ${CNOID_SHARE_SUBDIR})
+install(DIRECTORY project DESTINATION ${CNOID_SHARE_SUBDIR})
