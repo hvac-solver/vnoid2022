@@ -13,11 +13,11 @@ model_info.surface_contacts = [robotoc.ContactModelInfo('L_FOOT_R', baumgarte_ti
 robot = robotoc.Robot(model_info)
 
 knee_angle = np.pi / 6
-step_length = np.array([0.6, 0, 0]) 
+step_length = np.array([0.75, 0, 0]) 
 step_yaw = 0.0
 
-step_height = 0.1
-swing_time = 0.7
+step_height = 0.15
+swing_time = 0.6
 double_support_time = 0.0
 # double_support_time = 0.05
 swing_start_time = 0.5
