@@ -4,7 +4,8 @@
 #include <string>
 
 std::vector<std::string> getActuatedJointNames() {
-    return {"L_UPPERARM_P",
+    return {
+            "L_UPPERARM_P",
             "R_UPPERARM_P",
             "L_UPPERLEG_Y",
             "L_UPPERLEG_R",

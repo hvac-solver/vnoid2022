@@ -48,7 +48,7 @@ items:
           class: AISTSimulatorItem
           is_selected: true
           data: 
-            timeStep: 0.0025
+            timeStep: 0.001
             realtimeSync: true
             recording: "full"
             timeRangeMode: "Unlimited"
@@ -82,9 +82,10 @@ items:
           is_checked: true
           data: 
             file: "${SHARE}/model/sample_robot_description/body/sample_robot_ver2_reduced.body"
-            format: CHOREONOID-BODY
             currentBaseLink: "HIPS"
-            rootPosition: [ 0, 0, 0.8 ]
+            format: CHOREONOID-BODY
+            # rootPosition: [ 0, 0, 0.8 ]
+            rootPosition: [ 5.35, 1.5, 0.8 ]
             rootAttitude: [ 
               1, 0, 0, 
               0, 1, 0, 

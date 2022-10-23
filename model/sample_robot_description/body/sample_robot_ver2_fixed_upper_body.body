@@ -40,7 +40,7 @@ links:
     jointRange: [-30, 30]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 5.0
     centerOfMass: [0, 0, 0]
     inertia: [0.02, 0, 0,  0, 0.02, 0,  0, 0, 0.02]
@@ -68,7 +68,7 @@ links:
     jointRange: [-30, 70]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 5.0
     centerOfMass: [0, 0, 0]
     inertia: [0.02, 0, 0,  0, 0.02, 0,  0, 0, 0.02]
@@ -88,7 +88,7 @@ links:
     jointRange: [-90, 90]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 2.0
     centerOfMass: [0, 0, 0]
     inertia: [0.01, 0, 0,  0, 0.01, 0,  0, 0, 0.01]
@@ -108,7 +108,7 @@ links:
     jointRange: [-30, 60]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 2.0
     centerOfMass: [0, 0, 0]
     inertia: [0.01, 0, 0,  0, 0.01, 0,  0, 0, 0.01]
@@ -128,7 +128,7 @@ links:
     jointRange: [-180, 180]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 0.5
     centerOfMass: [0, 0, 0]
     inertia: [0.0004, 0, 0,  0, 0.0004, 0,  0, 0, 0.0004]
@@ -148,7 +148,7 @@ links:
     jointRange: [-90, 90]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 0.5
     centerOfMass: [0, 0, 0]
     inertia: [0.0004, 0, 0,  0, 0.0004, 0,  0, 0, 0.0004]
@@ -168,7 +168,7 @@ links:
     jointRange: [-180, 180]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 1.0
     centerOfMass: [0, 0, -0.1]
     inertia: [0.002, 0, 0,  0, 0.002, 0,  0, 0, 0.0004]
@@ -189,7 +189,7 @@ links:
     jointRange: [-150, 0]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 0.5
     centerOfMass: [0, 0, 0]
     inertia: [0.0004, 0, 0,  0, 0.0004, 0,  0, 0, 0.0004]
@@ -210,7 +210,7 @@ links:
     jointRange: [-90, 90]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 1.0
     centerOfMass: [0, 0, -0.1]
     inertia: [0.002, 0, 0,  0, 0.002, 0,  0, 0, 0.0004]
@@ -230,7 +230,7 @@ links:
     jointRange: [-90, 90]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 0.5
     centerOfMass: [0, 0, 0]
     inertia: [0.0003, 0, 0,  0, 0.0003, 0,  0, 0, 0.0003]
@@ -250,7 +250,7 @@ links:
     jointRange: [-90, 90]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 0.5
     centerOfMass: [0, 0, 0]
     inertia: [0.0003, 0, 0,  0, 0.0003, 0,  0, 0, 0.0003]
@@ -270,7 +270,7 @@ links:
     jointRange: [-180, 180]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 0.5
     centerOfMass: [0, 0, 0]
     inertia: [0.0004, 0, 0,  0, 0.0004, 0,  0, 0, 0.0004]
@@ -290,7 +290,7 @@ links:
     jointRange: [-90, 90]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 0.5
     centerOfMass: [0, 0, 0]
     inertia: [0.0004, 0, 0,  0, 0.0004, 0,  0, 0, 0.0004]
@@ -310,7 +310,7 @@ links:
     jointRange: [-180, 180]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 1.0
     centerOfMass: [0, 0, -0.1]
     inertia: [0.002, 0, 0,  0, 0.002, 0,  0, 0, 0.0004]
@@ -330,7 +330,7 @@ links:
     jointRange: [-150, 0]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 0.5
     centerOfMass: [0, 0, 0]
     inertia: [0.0004, 0, 0,  0, 0.0004, 0,  0, 0, 0.0004]
@@ -350,7 +350,7 @@ links:
     jointRange: [-90, 90]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 1.0
     centerOfMass: [0, 0, -0.1]
     inertia: [0.002, 0, 0,  0, 0.002, 0,  0, 0, 0.0004]
@@ -370,7 +370,7 @@ links:
     jointRange: [-90, 90]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 0.5
     centerOfMass: [0, 0, 0]
     inertia: [0.0003, 0, 0,  0, 0.0003, 0,  0, 0, 0.0003]
@@ -390,7 +390,7 @@ links:
     jointRange: [-90, 90]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 0.5
     centerOfMass: [0, 0, 0]
     inertia: [0.0003, 0, 0,  0, 0.0003, 0,  0, 0, 0.0003]
