@@ -107,11 +107,11 @@ private:
   int L_foot_id_, R_foot_id_, current_step_, planning_size_;
   double left_to_right_leg_distance_, foot_height_to_com_height_;
   aligned_deque<aligned_vector<SE3>> contact_placement_ref_;
-  std::vector<std::vector<Eigen::Vector3d>> contact_position_ref_;
-  std::vector<std::vector<Eigen::Matrix3d>> contact_surface_ref_;
-  std::vector<Eigen::Vector3d> com_ref_;
-  std::vector<Eigen::Matrix3d> R_;
-  Eigen::Vector3d vcom_, vcom_cmd_, step_length_;
+  std::deque<std::vector<Eigen::Vector3d>> contact_position_ref_;
+  std::deque<std::vector<Eigen::Matrix3d>> contact_surface_ref_;
+  std::deque<Eigen::Vector3d> com_ref_;
+  std::deque<Eigen::Matrix3d> R_;
+  Eigen::Vector3d step_length_;
   Eigen::Matrix3d R_current_;
   double yaw_rate_cmd_;
   bool enable_double_support_phase_, L_contact_active_, R_contact_active_;

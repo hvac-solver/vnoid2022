@@ -20,18 +20,20 @@
 
 struct StairClimbingParams 
 {
-    double knee_angle = M_PI / 6.0;
+    // double knee_angle = M_PI / 6.0;
+    double knee_angle = M_PI / 3.0;
 
-    Eigen::Vector3d initial_base_position = {0.0, 0.0, 0.0}; 
+    Eigen::Vector3d step_length = {0.3, 0.0, 0.2}; 
 
-    Eigen::Vector3d step_length = {0.6, 0.0, 0.0}; 
-
-    double step_height = 0.15;
+    double step_height = 0.4;
     double swing_time = 0.5;
     double double_support_time = 0.0; // must be zero with the current StairClimbingFootStepPlanner implementation.
     double swing_start_time = 0.5;
 
     int num_stair_steps = 10;
+
+    double initial_time = 0.0;
+    Eigen::Vector3d initial_base_position = {5.35, 1.5, 0.8}; 
 };
 
 
