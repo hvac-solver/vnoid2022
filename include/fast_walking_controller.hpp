@@ -13,6 +13,8 @@
 #include <string>
 #include <memory>
 
+#include "mpc_params.hpp"
+
 struct FastWalkingParams 
 {
     double knee_angle = M_PI / 6.0;
@@ -47,7 +49,7 @@ private:
     robotoc::MPCBipedWalk mpc_;
     std::shared_ptr<robotoc::BipedWalkFootStepPlanner> foot_step_planner_;
 
-    void initMPC(const FastWalkingParams& params);
+    void initMPC(const FastWalkingParams& walking_params, const MPCParams& mpc_params);
 
 public:
     bool initialize(cnoid::SimpleControllerIO* io) override;
