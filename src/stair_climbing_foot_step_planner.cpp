@@ -88,9 +88,6 @@ void StairClimbingFootStepPlanner::init(const Eigen::VectorXd& q) {
     com_ref_.clear();
     com_ref_.push_back(com); // step -1
     com_ref_.push_back(com); // step 0
-    R_.clear();
-    R_.push_back(R); // step -1
-    R_.push_back(R); // step 0
 
     // first 2 steps (on a blue plate)
     contact_placement[1].translation().template head<2>().noalias() += 0.5 * step_length_.template head<2>();
@@ -99,22 +96,21 @@ void StairClimbingFootStepPlanner::init(const Eigen::VectorXd& q) {
     com.template head<2>().noalias() += 0.25 * step_length_.template head<2>();
     com.coeffRef(2) += 0.5 * step_length_.coeff(2);
     com_ref_.push_back(com); // step 1
-    R_.push_back(R); // step 1
+
     contact_placement[0].translation().noalias() += step_length_;
     contact_placement_ref_.push_back(contact_placement); // step 2
     com = 0.5 * (contact_placement[0].translation() + contact_placement[1].translation());
     com.coeffRef(2) += foot_height_to_com_height_; 
     com_ref_.push_back(com); // step 2
-    R_.push_back(R); // step 2
 
     // next 3 steps
-    const double offset = 0.05;
+    // const double offset = 0.05;
+    const double offset = 0.0;
     contact_placement[1].translation().noalias() += step_length_;
     contact_placement[1].translation().coeffRef(2) -= offset; // adjust the height
     contact_placement_ref_.push_back(contact_placement); // step 1
     com.noalias() += 0.5 * step_length_;
     com_ref_.push_back(com); // step 1
-    R_.push_back(R); // step 1
 
     contact_placement[0].translation().noalias() += step_length_;
     contact_placement[0].translation().coeffRef(2) -= offset; // adjust the height
@@ -122,7 +118,6 @@ void StairClimbingFootStepPlanner::init(const Eigen::VectorXd& q) {
     com = 0.5 * (contact_placement[0].translation() + contact_placement[1].translation());
     com.coeffRef(2) += foot_height_to_com_height_; 
     com_ref_.push_back(com); // step 2
-    R_.push_back(R); // step 2
 
     contact_placement[1].translation().noalias() += step_length_;
     contact_placement[1].translation().coeffRef(2) -= offset; // adjust the height
@@ -130,7 +125,6 @@ void StairClimbingFootStepPlanner::init(const Eigen::VectorXd& q) {
     contact_placement_ref_.push_back(contact_placement); // step 1
     com.noalias() += 0.5 * step_length_;
     com_ref_.push_back(com); // step 1
-    R_.push_back(R); // step 1
 
     for (int i=4; i<planning_size_; ++i) {
       if (i%2 != 0) {
@@ -142,7 +136,6 @@ void StairClimbingFootStepPlanner::init(const Eigen::VectorXd& q) {
       contact_placement_ref_.push_back(contact_placement);
       com.noalias() += 0.5 * step_length_;
       com_ref_.push_back(com); 
-      R_.push_back(R); 
     }
   }
   L_contact_active_ = true;
@@ -150,6 +143,7 @@ void StairClimbingFootStepPlanner::init(const Eigen::VectorXd& q) {
 
   contact_position_ref_.clear();
   contact_surface_ref_.clear();
+  R_.clear();
   for (const auto& contact_placements : contact_placement_ref_) {
     std::vector<Eigen::Vector3d> contact_positions;
     std::vector<Eigen::Matrix3d> contact_surfaces;
@@ -159,10 +153,11 @@ void StairClimbingFootStepPlanner::init(const Eigen::VectorXd& q) {
     }
     contact_position_ref_.push_back(contact_positions);
     contact_surface_ref_.push_back(contact_surfaces);
+    R_.push_back(R);
   }
 
   for (auto& e : com_ref_) {
-    e.coeffRef(2) += 0.05;
+    e.coeffRef(2) += 0.1;
   }
 
   // std::cout << *this << std::endl;

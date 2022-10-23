@@ -27,6 +27,7 @@ struct StairClimbingParams
 
     double step_height = 0.4;
     double swing_time = 0.5;
+    // double swing_time = 0.7;
     double double_support_time = 0.0; // must be zero with the current StairClimbingFootStepPlanner implementation.
     double swing_start_time = 0.5;
 

@@ -96,6 +96,7 @@ bool AthleticController::initialize(cnoid::SimpleControllerIO* io)
     StairClimbingParams stair_climbing_params;
     MPCParams mpc_params;
     mpc_params.T = 0.5;
+    // mpc_params.T = 0.7;
     mpc_params.N = 20;
     mpc_params.iter = 1;
     mpc_params.nthreads = 6;
