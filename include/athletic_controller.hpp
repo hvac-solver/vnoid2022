@@ -27,6 +27,10 @@
 class AthleticController : public cnoid::SimpleController
 {
 private:
+    enum class ControlMode {
+        Stair, Jump
+    };
+    ControlMode control_mode_;
     // interfaces for a simulated body
     cnoid::Body* ioBody_;
 
@@ -36,8 +40,10 @@ private:
     // parameters
     double dt_;
     double t_;
-    MPCParams mpc_stair_climbing_params_, mpc_jump_params_;
     int mpc_inner_loop_count_;
+    MPCParams mpc_stair_climbing_params_, mpc_jump_params_;
+    StairClimbingParams stair_climbing_params_; 
+    JumpParams jump_params_; 
 
     // MPC solvers
     robotoc::MPCBipedWalk mpc_stair_climbing_;

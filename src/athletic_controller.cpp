@@ -29,8 +29,9 @@ void AthleticController::initMPCStairClimbing(const StairClimbingParams& climbin
     robotoc::Robot robot(model_info);
 
     stair_climbing_foot_step_planner_ = std::make_shared<robotoc::StairClimbingFootStepPlanner>(robot);
+    const int extra_floor_steps = 3;
     stair_climbing_foot_step_planner_->setGaitPattern(climbing_params.stair_step_length, climbing_params.num_stair_steps,
-                                                      climbing_params.floor_step_length, climbing_params.num_floor_steps);
+                                                      climbing_params.floor_step_length, climbing_params.num_floor_steps+extra_floor_steps);
 
     mpc_stair_climbing_ = robotoc::MPCBipedWalk(robot, mpc_params.T, mpc_params.N);
     mpc_stair_climbing_.setGaitPattern(stair_climbing_foot_step_planner_, climbing_params.step_height, 
@@ -150,27 +151,27 @@ bool AthleticController::initialize(cnoid::SimpleControllerIO* io)
     const std::string config_path = cnoid::shareDir() + "/project/athletic_controller.config.cnoid";
     const YAML::Node config = YAML::LoadFile(config_path);
 
-    StairClimbingParams stair_climbing_params;
-    stair_climbing_params.loadFromYAML(config["stair_climbing_params"]);
-    stair_climbing_params.check();
-    std::cout << stair_climbing_params << std::endl;
+    stair_climbing_params_ = StairClimbingParams();
+    stair_climbing_params_.loadFromYAML(config["stair_climbing_params"]);
+    stair_climbing_params_.check();
+    std::cout << stair_climbing_params_ << std::endl;
 
     mpc_stair_climbing_params_ = MPCParams();
     mpc_stair_climbing_params_.loadFromYAML(config["mpc_stair_climbing_params"]);
     mpc_stair_climbing_params_.check();
     std::cout << mpc_stair_climbing_params_ << std::endl;
-    initMPCStairClimbing(stair_climbing_params, mpc_stair_climbing_params_);
+    initMPCStairClimbing(stair_climbing_params_, mpc_stair_climbing_params_);
 
-    JumpParams jump_params;
-    jump_params.loadFromYAML(config["jump_params"]);
-    jump_params.check();
-    std::cout << jump_params << std::endl;
+    jump_params_ = JumpParams();
+    jump_params_.loadFromYAML(config["jump_params"]);
+    jump_params_.check();
+    std::cout << jump_params_ << std::endl;
 
     mpc_jump_params_ = MPCParams();
     mpc_jump_params_.loadFromYAML(config["mpc_jump_params"]);
     mpc_jump_params_.check();
     std::cout << mpc_jump_params_ << std::endl;
-    initMPCJump(jump_params, mpc_jump_params_);
+    initMPCJump(jump_params_, mpc_jump_params_);
 
     return true;
 }
@@ -179,6 +180,7 @@ bool AthleticController::start()
 {
     t_ = 0.0;
     mpc_inner_loop_count_ = mpc_stair_climbing_params_.sim_steps_per_mpc_update - 1;
+    control_mode_ = ControlMode::Stair;
     return true;
 }
 
@@ -205,29 +207,70 @@ bool AthleticController::control()
         v.coeffRef(i+6) = ioBody_->joint(jointIds_[i])->dq();
     }
 
-    // TODO: introduce switch-case or if to switch the controller
-    if (mpc_inner_loop_count_ == 0) {
-        mpc_stair_climbing_.updateSolution(t_, dt_, q, v);
-        const auto& u = mpc_stair_climbing_.getInitialControlInput();
-        // applies the inputs
-        for (int i=0; i<jointIds_.size(); ++i) {
-            ioBody_->joint(jointIds_[i])->u() = u.coeff(i);
+    switch (control_mode_)
+    {
+    case ControlMode::Stair: {
+        if (mpc_inner_loop_count_ == 0) {
+            mpc_stair_climbing_.updateSolution(t_, dt_, q, v);
+            const auto& u = mpc_stair_climbing_.getInitialControlInput();
+            // applies the inputs
+            for (int i=0; i<jointIds_.size(); ++i) {
+                ioBody_->joint(jointIds_[i])->u() = u.coeff(i);
+            }
+            mpc_inner_loop_count_ = mpc_stair_climbing_params_.sim_steps_per_mpc_update - 1;
         }
-        mpc_inner_loop_count_ = mpc_stair_climbing_params_.sim_steps_per_mpc_update - 1;
-    }
-    else {
-        const auto policy = mpc_stair_climbing_.getControlPolicy(t_);
-        const Eigen::VectorXd u = policy.tauJ - policy.Kp * (policy.qJ - q.tail(jointIds_.size()))
-                                              - policy.Kd * (policy.dqJ - v.tail(jointIds_.size()));
-        // applies the inputs
-        for (int i=0; i<jointIds_.size(); ++i) {
-            ioBody_->joint(jointIds_[i])->u() = u.coeff(i);
+        else {
+            const auto policy = mpc_stair_climbing_.getControlPolicy(t_);
+            const Eigen::VectorXd u = policy.tauJ - policy.Kp * (policy.qJ - q.tail(jointIds_.size()))
+                                                - policy.Kd * (policy.dqJ - v.tail(jointIds_.size()));
+            // applies the inputs
+            for (int i=0; i<jointIds_.size(); ++i) {
+                ioBody_->joint(jointIds_[i])->u() = u.coeff(i);
+            }
+            --mpc_inner_loop_count_;
         }
-        --mpc_inner_loop_count_;
+        break;
     }
-    // std::cout << stair_climbing_foot_step_planner_ << std::endl;
+    case ControlMode::Jump: {
+        if (mpc_inner_loop_count_ == 0) {
+            mpc_jump_.updateSolution(t_, dt_, q, v);
+            const auto& u = mpc_jump_.getInitialControlInput();
+            // applies the inputs
+            for (int i=0; i<jointIds_.size(); ++i) {
+                ioBody_->joint(jointIds_[i])->u() = u.coeff(i);
+            }
+            mpc_inner_loop_count_ = mpc_jump_params_.sim_steps_per_mpc_update - 1;
+        }
+        else {
+            const auto policy = mpc_jump_.getControlPolicy(t_);
+            const Eigen::VectorXd u = policy.tauJ - policy.Kp * (policy.qJ - q.tail(jointIds_.size()))
+                                                  - policy.Kd * (policy.dqJ - v.tail(jointIds_.size()));
+            // applies the inputs
+            for (int i=0; i<jointIds_.size(); ++i) {
+                ioBody_->joint(jointIds_[i])->u() = u.coeff(i);
+            }
+            --mpc_inner_loop_count_;
+        }
+        break;
+    }
+    default: {
+        for (int i=0; i<jointIds_.size(); ++i) {
+            ioBody_->joint(jointIds_[i])->u() = 0;
+        }
+        break;
+    }
+    } // switch
 
     t_ += dt_;
+    if (t_ < (stair_climbing_params_.initial_time 
+                + stair_climbing_params_.swing_start_time
+                + 2 * stair_climbing_params_.num_stair_steps * stair_climbing_params_.swing_time
+                + 2 * stair_climbing_params_.num_floor_steps * stair_climbing_params_.swing_time)) {
+        control_mode_ = ControlMode::Stair;
+    }
+    else {
+        control_mode_ = ControlMode::Jump;
+    }
 
     return true;
 }

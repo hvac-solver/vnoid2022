@@ -20,7 +20,7 @@ struct StairClimbingParams
     double height_offset = 0.05;
 
     int num_stair_steps = 14;
-    int num_floor_steps = 3 + 2; // 2 is offset
+    int num_floor_steps = 3; 
 
     double initial_time = 0.0;
     Eigen::Vector3d initial_base_position = {5.35, 1.5, 0.75}; 
