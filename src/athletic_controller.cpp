@@ -10,6 +10,8 @@
 #include <robotoc/cost/periodic_com_ref.hpp>
 #include <robotoc/cost/periodic_swing_foot_ref.hpp>
 
+#include <yaml-cpp/yaml.h>
+
 using cnoid::Matrix3;
 using cnoid::Vector3;
 using cnoid::Vector6;
@@ -126,18 +128,19 @@ bool AthleticController::initialize(cnoid::SimpleControllerIO* io)
     }
 
     /*** MPC initialization ***/
+    const std::string config_path = cnoid::shareDir() + "/project/athletic_controller.config.cnoid";
+    const YAML::Node config = YAML::LoadFile(config_path);
+
     StairClimbingParams stair_climbing_params;
-    MPCParams mpc_params;
-    mpc_params.T = 0.5;
-    mpc_params.N = 20;
-    mpc_params.iter = 1;
-    mpc_params.nthreads = 4;
-    mpc_params.sim_steps_per_mpc_update = 2;
+    stair_climbing_params.loadFromYAML(config["stair_climbing_params"]);
+    stair_climbing_params.check();
+    std::cout << stair_climbing_params << std::endl;
 
-    checkMPCParams(mpc_params);
-    mpc_params_ = mpc_params;
-
-    initStairClimbingMPC(stair_climbing_params, mpc_params);
+    mpc_params_ = MPCParams();
+    mpc_params_.loadFromYAML(config["mpc_params"]);
+    mpc_params_.check();
+    std::cout << mpc_params_ << std::endl;
+    initStairClimbingMPC(stair_climbing_params, mpc_params_);
 
     return true;
 }

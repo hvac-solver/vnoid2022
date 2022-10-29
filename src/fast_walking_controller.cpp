@@ -7,12 +7,14 @@
 #include <cnoid/ExecutablePath>
 #include <cnoid/SimpleController>
 
+#include <yaml-cpp/yaml.h>
+
 using cnoid::Matrix3;
 using cnoid::Vector3;
 using cnoid::Vector6;
 using cnoid::VectorX;
 
-void FastWalkingController::initMPC(const FastWalkingParams& walking_params, const MPCParams& mpc_params)
+void FastWalkingController::initMPC(const FastWalkingParams& fast_walking_params, const MPCParams& mpc_params)
 {
     robotoc::RobotModelInfo model_info; 
     model_info.urdf_path = cnoid::shareDir() + "/model/sample_robot_description/urdf/sample_robot_reduced.urdf";
@@ -23,19 +25,21 @@ void FastWalkingController::initMPC(const FastWalkingParams& walking_params, con
     robotoc::Robot robot(model_info);
 
     foot_step_planner_ = std::make_shared<robotoc::BipedWalkFootStepPlanner>(robot);
-    if (walking_params.use_raibert) {
-        const Eigen::Vector3d vcom_cmd = 0.5 * walking_params.step_length / (walking_params.swing_time+walking_params.double_support_time);
-        const double yaw_rate_cmd = walking_params.step_yaw / walking_params.swing_time;
-        foot_step_planner_->setRaibertGaitPattern(vcom_cmd, yaw_rate_cmd, walking_params.swing_time, 
-                                                   walking_params.double_support_time, walking_params.raibert_gain);
+    if (fast_walking_params.use_raibert) {
+        const Eigen::Vector3d vcom_cmd = 0.5 * fast_walking_params.step_length 
+                                            / (fast_walking_params.swing_time+fast_walking_params.double_support_time);
+        const double yaw_rate_cmd = fast_walking_params.step_yaw / fast_walking_params.swing_time;
+        foot_step_planner_->setRaibertGaitPattern(vcom_cmd, yaw_rate_cmd, fast_walking_params.swing_time, 
+                                                   fast_walking_params.double_support_time, fast_walking_params.raibert_gain);
     }
     else {
-        foot_step_planner_->setGaitPattern(walking_params.step_length, walking_params.step_yaw, (walking_params.double_support_time > 0.));
+        foot_step_planner_->setGaitPattern(fast_walking_params.step_length, fast_walking_params.step_yaw, 
+                                           (fast_walking_params.double_support_time > 0.));
     }
 
     mpc_ = robotoc::MPCBipedWalk(robot, mpc_params.T, mpc_params.N);
-    mpc_.setGaitPattern(foot_step_planner_, walking_params.step_height, walking_params.swing_time, 
-                        walking_params.double_support_time, walking_params.swing_start_time);
+    mpc_.setGaitPattern(foot_step_planner_, fast_walking_params.step_height, fast_walking_params.swing_time, 
+                        fast_walking_params.double_support_time, fast_walking_params.swing_start_time);
 
     const double X = 0.08;
     const double Y = 0.04;
@@ -47,10 +51,10 @@ void FastWalkingController::initMPC(const FastWalkingParams& walking_params, con
     q0 << 0, 0, 0, 0, 0, 0, 1,
           0, // left sholder
           0, // right sholder
-          0, 0, -0.5*walking_params.knee_angle, walking_params.knee_angle, -0.5*walking_params.knee_angle, 0, // left leg
-          0, 0, -0.5*walking_params.knee_angle, walking_params.knee_angle, -0.5*walking_params.knee_angle, 0; // right leg
+          0, 0, -0.5*fast_walking_params.knee_angle, fast_walking_params.knee_angle, -0.5*fast_walking_params.knee_angle, 0, // left leg
+          0, 0, -0.5*fast_walking_params.knee_angle, fast_walking_params.knee_angle, -0.5*fast_walking_params.knee_angle, 0; // right leg
     robot.updateFrameKinematics(q0);
-    q0[2] = - 0.5 * (robot.framePosition("L_FOOT_R")[2] + robot.framePosition("R_FOOT_R")[2]) + walking_params.height_offset;
+    q0[2] = - 0.5 * (robot.framePosition("L_FOOT_R")[2] + robot.framePosition("R_FOOT_R")[2]) + fast_walking_params.height_offset;
     const Eigen::VectorXd v0 = Eigen::VectorXd::Zero(robot.dimv());
     robotoc::SolverOptions option_init;
     option_init.max_iter = 200;
@@ -96,18 +100,19 @@ bool FastWalkingController::initialize(cnoid::SimpleControllerIO* io)
     }
 
     /*** MPC initialization ***/
-    FastWalkingParams walking_params;
-    MPCParams mpc_params;
-    mpc_params.T = 0.7;
-    mpc_params.N = 25;
-    mpc_params.iter = 1;
-    mpc_params.nthreads = 6;
-    mpc_params.sim_steps_per_mpc_update = 2;
+    const std::string config_path = cnoid::shareDir() + "/project/fast_walking_controller.config.cnoid";
+    const YAML::Node config = YAML::LoadFile(config_path);
 
-    checkMPCParams(mpc_params);
-    mpc_params_ = mpc_params;
+    FastWalkingParams fast_walking_params;
+    fast_walking_params.loadFromYAML(config["fast_walking_params"]);
+    fast_walking_params.check();
+    std::cout << fast_walking_params << std::endl;
 
-    initMPC(walking_params, mpc_params);
+    mpc_params_ = MPCParams();
+    mpc_params_.loadFromYAML(config["mpc_params"]);
+    mpc_params_.check();
+    std::cout << mpc_params_ << std::endl;
+    initMPC(fast_walking_params, mpc_params_);
 
     return true;
 }

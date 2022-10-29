@@ -14,27 +14,12 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <stdexcept>
 
 #include "mpc_params.hpp"
+#include "stair_climbing_params.hpp"
+
 #include "stair_climbing_foot_step_planner.hpp"
-
-struct StairClimbingParams 
-{
-    double knee_angle = M_PI / 3.0;
-
-    Eigen::Vector3d step_length = {0.3, 0.0, 0.2}; 
-
-    double step_height = 0.4;
-    double swing_time = 0.5;
-    double double_support_time = 0.0; // must be zero with the current StairClimbingFootStepPlanner implementation.
-    double swing_start_time = 0.5;
-    double height_offset = 0.05;
-
-    int num_stair_steps = 14;
-
-    double initial_time = 0.0;
-    Eigen::Vector3d initial_base_position = {5.35, 1.5, 0.75}; 
-};
 
 
 class AthleticController : public cnoid::SimpleController
