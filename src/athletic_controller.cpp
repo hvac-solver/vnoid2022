@@ -34,7 +34,7 @@ void AthleticController::initMPCStairClimbing(const StairClimbingParams& climbin
                                                       climbing_params.floor_step_length, climbing_params.num_floor_steps+extra_floor_steps);
 
     mpc_stair_climbing_ = robotoc::MPCBipedWalk(robot, mpc_params.T, mpc_params.N);
-    mpc_stair_climbing_.setGaitPattern(stair_climbing_foot_step_planner_, climbing_params.step_height, 
+    mpc_stair_climbing_.setGaitPattern(stair_climbing_foot_step_planner_, climbing_params.stair_step_height, 
                                        climbing_params.swing_time, climbing_params.double_support_time, climbing_params.swing_start_time);
 
     mpc_stair_climbing_.getConfigCostHandle()->set_u_weight(Eigen::VectorXd::Constant(robot.dimu(), 1.0e-03));
@@ -210,6 +210,13 @@ bool AthleticController::control()
     switch (control_mode_)
     {
     case ControlMode::Stair: {
+        const double stair_end_time = stair_climbing_params_.initial_time + stair_climbing_params_.swing_start_time
+                                        + 2 * stair_climbing_params_.num_stair_steps * stair_climbing_params_.swing_time;
+        if (t_-dt_ < stair_end_time && t_ >= stair_end_time) {
+            mpc_stair_climbing_.setGaitPattern(stair_climbing_foot_step_planner_, stair_climbing_params_.floor_step_height, 
+                                               stair_climbing_params_.swing_time, stair_climbing_params_.double_support_time, 
+                                               stair_climbing_params_.swing_start_time);
+        }
         if (mpc_inner_loop_count_ == 0) {
             mpc_stair_climbing_.updateSolution(t_, dt_, q, v);
             const auto& u = mpc_stair_climbing_.getInitialControlInput();
@@ -269,6 +276,9 @@ bool AthleticController::control()
         control_mode_ = ControlMode::Stair;
     }
     else {
+        if (control_mode_ == ControlMode::Stair) {
+            mpc_inner_loop_count_ = 0;
+        }
         control_mode_ = ControlMode::Jump;
     }
 

@@ -13,7 +13,8 @@ struct StairClimbingParams
     Eigen::Vector3d stair_step_length = {0.3, 0.0, 0.2}; 
     Eigen::Vector3d floor_step_length = {0.45, 0.0, 0.0}; 
 
-    double step_height = 0.4;
+    double stair_step_height = 0.4;
+    double floor_step_height = 0.2;
     double swing_time = 0.5;
     double double_support_time = 0.0; // must be zero with the current StairClimbingFootStepPlanner implementation.
     double swing_start_time = 0.5;
@@ -42,8 +43,10 @@ struct StairClimbingParams
             }
             floor_step_length = Eigen::Map<const Eigen::Vector3d>(floor_step_length_stdvec.data());
         }
-        if (config["step_height"].IsDefined()) 
-            step_height = config["step_height"].as<double>();
+        if (config["stair_step_height"].IsDefined()) 
+            stair_step_height = config["stair_step_height"].as<double>();
+        if (config["floor_step_height"].IsDefined()) 
+            floor_step_height = config["floor_step_height"].as<double>();
         if (config["swing_time"].IsDefined()) 
             swing_time = config["swing_time"].as<double>();
         if (config["swing_start_time"].IsDefined()) 
@@ -65,8 +68,11 @@ struct StairClimbingParams
         if (knee_angle < 0.0) {
             throw std::invalid_argument("StairClimbingParams.knee_angle must be non-negative!");
         }
-        if (step_height <= 0.0) {
-            throw std::invalid_argument("StairClimbingParams.step_height must be positive!");
+        if (stair_step_height <= 0.0) {
+            throw std::invalid_argument("StairClimbingParams.stair_step_height must be positive!");
+        }
+        if (floor_step_height <= 0.0) {
+            throw std::invalid_argument("StairClimbingParams.floor_step_height must be positive!");
         }
         if (swing_time <= 0.0) {
             throw std::invalid_argument("StairClimbingParams.swing_time must be positive!");
@@ -91,7 +97,8 @@ struct StairClimbingParams
         os << "  knee_angle:            " << climbing_params.knee_angle << "\n";
         os << "  stair_step_length:     " << climbing_params.stair_step_length.transpose() << "\n";
         os << "  floor_step_length:     " << climbing_params.floor_step_length.transpose() << "\n";
-        os << "  step_height:           " << climbing_params.step_height << "\n";
+        os << "  stair_step_height:     " << climbing_params.stair_step_height << "\n";
+        os << "  floor_step_height:     " << climbing_params.floor_step_height << "\n";
         os << "  swing_time:            " << climbing_params.swing_time << "\n";
         os << "  double_support_time:   " << climbing_params.double_support_time << "\n";
         os << "  swing_start_time:      " << climbing_params.swing_start_time << "\n";
