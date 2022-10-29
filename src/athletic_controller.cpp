@@ -29,8 +29,8 @@ void AthleticController::initStairClimbingMPC(const StairClimbingParams& climbin
     robotoc::Robot robot(model_info);
 
     stair_climbing_foot_step_planner_ = std::make_shared<robotoc::StairClimbingFootStepPlanner>(robot);
-    const int num_extra_steps = 4;
-    stair_climbing_foot_step_planner_->setGaitPattern(climbing_params.step_length, climbing_params.num_stair_steps+num_extra_steps);
+    stair_climbing_foot_step_planner_->setGaitPattern(climbing_params.stair_step_length, climbing_params.num_stair_steps,
+                                                      climbing_params.floor_step_length, climbing_params.num_floor_steps);
 
     mpc_stair_climbing_ = robotoc::MPCBipedWalk(robot, mpc_params.T, mpc_params.N);
     mpc_stair_climbing_.setGaitPattern(stair_climbing_foot_step_planner_, climbing_params.step_height, 
@@ -59,29 +59,29 @@ void AthleticController::initStairClimbingMPC(const StairClimbingParams& climbin
     robot.updateFrameKinematics(q0);
 
     // set swing foot refs
-    const Eigen::Vector3d L_foot_pos0 = robot.framePosition("L_FOOT_R");
-    const Eigen::Vector3d R_foot_pos0 = robot.framePosition("R_FOOT_R");
-    const double L_foot_t0 = climbing_params.swing_start_time + climbing_params.swing_time + climbing_params.double_support_time;
-    const double R_foot_t0 = climbing_params.swing_start_time;
-    auto L_foot_ref = std::make_shared<robotoc::PeriodicSwingFootRef>(L_foot_pos0, climbing_params.step_length, climbing_params.step_height, 
-                                                                      L_foot_t0, climbing_params.swing_time, 
-                                                                      climbing_params.swing_time+2.0*climbing_params.double_support_time, false);
-    auto R_foot_ref = std::make_shared<robotoc::PeriodicSwingFootRef>(R_foot_pos0, climbing_params.step_length, climbing_params.step_height, 
-                                                                      R_foot_t0, climbing_params.swing_time, 
-                                                                      climbing_params.swing_time+2.0*climbing_params.double_support_time, false);
-    mpc_stair_climbing_.getSwingFootCostHandle()[0]->set_ref(L_foot_ref);
-    mpc_stair_climbing_.getSwingFootCostHandle()[1]->set_ref(R_foot_ref);
+    // const Eigen::Vector3d L_foot_pos0 = robot.framePosition("L_FOOT_R");
+    // const Eigen::Vector3d R_foot_pos0 = robot.framePosition("R_FOOT_R");
+    // const double L_foot_t0 = climbing_params.swing_start_time + climbing_params.swing_time + climbing_params.double_support_time;
+    // const double R_foot_t0 = climbing_params.swing_start_time;
+    // auto L_foot_ref = std::make_shared<robotoc::PeriodicSwingFootRef>(L_foot_pos0, climbing_params.stair_step_length, climbing_params.step_height, 
+    //                                                                   L_foot_t0, climbing_params.swing_time, 
+    //                                                                   climbing_params.swing_time+2.0*climbing_params.double_support_time, false);
+    // auto R_foot_ref = std::make_shared<robotoc::PeriodicSwingFootRef>(R_foot_pos0, climbing_params.stair_step_length, climbing_params.step_height, 
+    //                                                                   R_foot_t0, climbing_params.swing_time, 
+    //                                                                   climbing_params.swing_time+2.0*climbing_params.double_support_time, false);
+    // mpc_stair_climbing_.getSwingFootCostHandle()[0]->set_ref(L_foot_ref);
+    // mpc_stair_climbing_.getSwingFootCostHandle()[1]->set_ref(R_foot_ref);
     mpc_stair_climbing_.getSwingFootCostHandle()[0]->set_weight(Eigen::Vector3d::Constant(1.0e03));
     mpc_stair_climbing_.getSwingFootCostHandle()[1]->set_weight(Eigen::Vector3d::Constant(1.0e03));
 
     // set CoM ref
-    Eigen::Vector3d com_ref0 = robot.CoM();
-    com_ref0[2] += climbing_params.height_offset;
-    const Eigen::Vector3d vcom_ref = 0.5 * climbing_params.step_length / climbing_params.swing_time;
-    auto com_ref = std::make_shared<robotoc::PeriodicCoMRef>(com_ref0, vcom_ref, 
-                                                             climbing_params.swing_start_time, 
-                                                             climbing_params.swing_time, climbing_params.double_support_time, false);
-    mpc_stair_climbing_.getCoMCostHandle()->set_ref(com_ref);
+    // Eigen::Vector3d com_ref0 = robot.CoM();
+    // com_ref0[2] += climbing_params.height_offset;
+    // const Eigen::Vector3d vcom_ref = 0.5 * climbing_params.stair_step_length / climbing_params.swing_time;
+    // auto com_ref = std::make_shared<robotoc::PeriodicCoMRef>(com_ref0, vcom_ref, 
+    //                                                          climbing_params.swing_start_time, 
+    //                                                          climbing_params.swing_time, climbing_params.double_support_time, false);
+    // mpc_stair_climbing_.getCoMCostHandle()->set_ref(com_ref);
     mpc_stair_climbing_.getCoMCostHandle()->set_weight((Eigen::Vector3d() << 1.0e04, 1.0e04, 1.0e03).finished());
 
     robotoc::SolverOptions option_init;

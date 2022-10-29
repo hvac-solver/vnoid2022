@@ -1,9 +1,19 @@
 stair_climbing_params:
   knee_angle: 1.0471975511965976 # M_PI / 3
-  step_length: [0.3, 0, 0.2]
+  stair_step_length: [0.3, 0, 0.2]
   step_height: 0.4
   swing_time: 0.5
-  double_support_time: 0.0
+  swing_start_time: 0.5
+  height_offset: 0.05
+  num_stair_steps: 14
+  initial_time: 0.0
+  initial_base_position: [5.35, 1.5, 0.75]
+
+jump_params:
+  knee_angle: 1.0471975511965976 # M_PI / 3
+  stair_step_length: [0.3, 0, 0.2]
+  step_height: 0.4
+  swing_time: 0.5
   swing_start_time: 0.5
   height_offset: 0.05
   num_stair_steps: 14
@@ -15,4 +25,4 @@ mpc_params:
   N: 20
   iter: 1
   nthreads: 4
-  sim_steps_per_mpc_update: 2
+  sim_steps_per_mpc_update: 1

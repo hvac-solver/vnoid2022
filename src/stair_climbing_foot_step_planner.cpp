@@ -20,7 +20,8 @@ StairClimbingFootStepPlanner::StairClimbingFootStepPlanner(const Robot& biped_ro
     contact_surface_ref_(),
     com_ref_(),
     R_(),
-    step_length_(Eigen::Vector3d::Zero()),
+    stair_step_length_(Eigen::Vector3d::Zero()),
+    floor_step_length_(Eigen::Vector3d::Zero()),
     enable_double_support_phase_(false),
     L_contact_active_(false), 
     R_contact_active_(false) {
@@ -39,11 +40,15 @@ StairClimbingFootStepPlanner::~StairClimbingFootStepPlanner() {
 }
 
 
-void StairClimbingFootStepPlanner::setGaitPattern(const Eigen::Vector3d& step_length, 
+void StairClimbingFootStepPlanner::setGaitPattern(const Eigen::Vector3d& stair_step_length, 
                                                   const int num_stair_steps,
+                                                  const Eigen::Vector3d& floor_step_length, 
+                                                  const int num_floor_steps,
                                                   const bool enable_double_support_phase) {
-  step_length_ = step_length;
-  planning_size_ = 2 * num_stair_steps;
+  stair_step_length_ = stair_step_length;
+  floor_step_length_ = floor_step_length;
+  num_stair_foot_steps_ = 2 * num_stair_steps;
+  planning_size_ = 2 * num_stair_steps + 2 * num_floor_steps;
   enable_double_support_phase_ = enable_double_support_phase;
   if (enable_double_support_phase_) {
     throw std::runtime_error(
@@ -89,15 +94,27 @@ void StairClimbingFootStepPlanner::init(const Eigen::VectorXd& q) {
   com_ref_.push_back(com); // step -1
   com_ref_.push_back(com); // step 0
 
-  for (int i=0; i<planning_size_; ++i) {
+  for (int i=0; i<num_stair_foot_steps_; ++i) {
     if (i%2 != 0) {
-      contact_placement[0].translation().noalias() += step_length_;
+      contact_placement[0].translation().noalias() += stair_step_length_;
     }
     else {
-      contact_placement[1].translation().noalias() += step_length_;
+      contact_placement[1].translation().noalias() += stair_step_length_;
     }
     contact_placement_ref_.push_back(contact_placement);
-    com.noalias() += 0.5 * step_length_;
+    com.noalias() += 0.5 * stair_step_length_;
+    com_ref_.push_back(com); 
+  }
+
+  for (int i=num_stair_foot_steps_; i<planning_size_; ++i) {
+    if (i%2 != 0) {
+      contact_placement[0].translation().noalias() += floor_step_length_;
+    }
+    else {
+      contact_placement[1].translation().noalias() += floor_step_length_;
+    }
+    contact_placement_ref_.push_back(contact_placement);
+    com.noalias() += 0.5 * floor_step_length_;
     com_ref_.push_back(com); 
   }
 
