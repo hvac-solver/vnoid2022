@@ -61,13 +61,17 @@ public:
 
   ///
   /// @brief Sets the gait pattern by step length and yaw step command. 
-  /// @param[in] step_length Step length of the gait. 
+  /// @param[in] stair_step_length Step length of the gait. 
   /// @param[in] num_stair_steps Number of the stair steps. 
+  /// @param[in] num_stair_steps Number of the floor steps. 
+  /// @param[in] floor_step_length Step length of the gait. 
   /// @param[in] enable_double_support_phase Enables the double-support 
   /// phase or not. Default is false.
   ///
-  void setGaitPattern(const Eigen::Vector3d& step_length, 
+  void setGaitPattern(const Eigen::Vector3d& stair_step_length, 
                       const int num_stair_steps,
+                      const Eigen::Vector3d& floor_step_length,
+                      const int num_floor_steps,
                       const bool enable_double_support_phase=false);
 
   void init(const Eigen::VectorXd& q) override;
@@ -104,14 +108,14 @@ public:
 
 private:
   Robot robot_;
-  int L_foot_id_, R_foot_id_, planning_size_;
+  int L_foot_id_, R_foot_id_, num_stair_foot_steps_, planning_size_;
   double left_to_right_leg_distance_, foot_height_to_com_height_;
   aligned_deque<aligned_vector<SE3>> contact_placement_ref_;
   std::deque<std::vector<Eigen::Vector3d>> contact_position_ref_;
   std::deque<std::vector<Eigen::Matrix3d>> contact_surface_ref_;
   std::deque<Eigen::Vector3d> com_ref_;
   std::deque<Eigen::Matrix3d> R_;
-  Eigen::Vector3d step_length_;
+  Eigen::Vector3d stair_step_length_, floor_step_length_;
   double yaw_rate_cmd_;
   bool enable_double_support_phase_, L_contact_active_, R_contact_active_;
 
