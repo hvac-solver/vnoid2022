@@ -22,19 +22,18 @@ void FastWalkingController::initMPC(const FastWalkingParams& walking_params, con
                                    robotoc::ContactModelInfo("R_FOOT_R", baumgarte_time_step)};
     robotoc::Robot robot(model_info);
 
-    const Eigen::Vector3d vcom_cmd = 0.5 * walking_params.step_length / (walking_params.swing_time+walking_params.double_support_time);
-    const double yaw_rate_cmd = walking_params.step_yaw / walking_params.swing_time;
-
-    mpc_ = robotoc::MPCBipedWalk(robot, mpc_params.T, mpc_params.N);
-
     foot_step_planner_ = std::make_shared<robotoc::BipedWalkFootStepPlanner>(robot);
     if (walking_params.use_raibert) {
+        const Eigen::Vector3d vcom_cmd = 0.5 * walking_params.step_length / (walking_params.swing_time+walking_params.double_support_time);
+        const double yaw_rate_cmd = walking_params.step_yaw / walking_params.swing_time;
         foot_step_planner_->setRaibertGaitPattern(vcom_cmd, yaw_rate_cmd, walking_params.swing_time, 
                                                    walking_params.double_support_time, walking_params.raibert_gain);
     }
     else {
         foot_step_planner_->setGaitPattern(walking_params.step_length, walking_params.step_yaw, (walking_params.double_support_time > 0.));
     }
+
+    mpc_ = robotoc::MPCBipedWalk(robot, mpc_params.T, mpc_params.N);
     mpc_.setGaitPattern(foot_step_planner_, walking_params.step_height, walking_params.swing_time, 
                         walking_params.double_support_time, walking_params.swing_start_time);
 
@@ -90,7 +89,7 @@ bool FastWalkingController::initialize(cnoid::SimpleControllerIO* io)
     }
 
     // gets the actuated joint ids
-    const auto actuatedJointNames = getActuatedJointNames();
+    const auto actuatedJointNames = getActuatedJointNamesOfReducedModel();
     jointIds_.clear();
     for (const auto& e : actuatedJointNames) {
         jointIds_.push_back(io->body()->joint(e.c_str())->jointId());

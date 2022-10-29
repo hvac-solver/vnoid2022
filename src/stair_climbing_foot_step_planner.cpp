@@ -13,7 +13,6 @@ StairClimbingFootStepPlanner::StairClimbingFootStepPlanner(const Robot& biped_ro
     robot_(biped_robot),
     L_foot_id_(biped_robot.surfaceContactFrames()[0]),
     R_foot_id_(biped_robot.surfaceContactFrames()[1]),
-    current_step_(0),
     left_to_right_leg_distance_(0),
     foot_height_to_com_height_(0),
     contact_placement_ref_(),
@@ -22,7 +21,6 @@ StairClimbingFootStepPlanner::StairClimbingFootStepPlanner(const Robot& biped_ro
     com_ref_(),
     R_(),
     step_length_(Eigen::Vector3d::Zero()),
-    R_current_(Eigen::Matrix3d::Identity()),
     enable_double_support_phase_(false),
     L_contact_active_(false), 
     R_contact_active_(false) {
@@ -63,12 +61,9 @@ void StairClimbingFootStepPlanner::init(const Eigen::VectorXd& q) {
           R.transpose() * (robot_.framePosition(R_foot_id_)-q.template head<3>()) };
   left_to_right_leg_distance_ = contact_position_local[0].coeff(1)
                                   - contact_position_local[1].coeff(1);
-  const double foot_height = 0.5 * (robot_.framePosition(L_foot_id_).coeff(2)
-                                      + robot_.framePosition(R_foot_id_).coeff(2));
-  foot_height_to_com_height_ = robot_.CoM().coeff(2) - foot_height;
-  contact_position_ref_.clear();
-  contact_surface_ref_.clear();
-  current_step_ = 0;
+  // const double foot_height = 0.5 * (robot_.framePosition(L_foot_id_).coeff(2)
+  //                                     + robot_.framePosition(R_foot_id_).coeff(2));
+  // foot_height_to_com_height_ = robot_.CoM().coeff(2) - foot_height;
 
   aligned_vector<SE3> contact_placement, contact_placement_local;
   for (const auto frame : robot_.surfaceContactFrames()) {
@@ -87,8 +82,9 @@ void StairClimbingFootStepPlanner::init(const Eigen::VectorXd& q) {
   contact_placement_ref_.clear();
   contact_placement_ref_.push_back(contact_placement); // step -1
   contact_placement_ref_.push_back(contact_placement); // step 0 
-  Eigen::Vector3d com = 0.5 * (contact_placement[0].translation() + contact_placement[1].translation());
-  com.coeffRef(2) += foot_height_to_com_height_;
+  // Eigen::Vector3d com = 0.5 * (contact_placement[0].translation() + contact_placement[1].translation());
+  // com.coeffRef(2) += foot_height_to_com_height_;
+  Eigen::Vector3d com = robot_.CoM();
   com_ref_.clear();
   com_ref_.push_back(com); // step -1
   com_ref_.push_back(com); // step 0
