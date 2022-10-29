@@ -27,7 +27,8 @@ void AthleticController::initStairClimbingMPC(const StairClimbingParams& climbin
     robotoc::Robot robot(model_info);
 
     stair_climbing_foot_step_planner_ = std::make_shared<robotoc::StairClimbingFootStepPlanner>(robot);
-    stair_climbing_foot_step_planner_->setGaitPattern(climbing_params.step_length, climbing_params.num_stair_steps);
+    const int num_extra_steps = 4;
+    stair_climbing_foot_step_planner_->setGaitPattern(climbing_params.step_length, climbing_params.num_stair_steps+num_extra_steps);
 
     mpc_stair_climbing_ = robotoc::MPCBipedWalk(robot, mpc_params.T, mpc_params.N);
     mpc_stair_climbing_.setGaitPattern(stair_climbing_foot_step_planner_, climbing_params.step_height, 
@@ -131,6 +132,11 @@ bool AthleticController::initialize(cnoid::SimpleControllerIO* io)
     mpc_params.N = 20;
     mpc_params.iter = 1;
     mpc_params.nthreads = 4;
+    mpc_params.sim_steps_per_mpc_update = 2;
+
+    checkMPCParams(mpc_params);
+    mpc_params_ = mpc_params;
+
     initStairClimbingMPC(stair_climbing_params, mpc_params);
 
     return true;
@@ -139,6 +145,7 @@ bool AthleticController::initialize(cnoid::SimpleControllerIO* io)
 bool AthleticController::start()
 {
     t_ = 0.0;
+    mpc_inner_loop_count_ = mpc_params_.sim_steps_per_mpc_update - 1;
     return true;
 }
 
@@ -166,14 +173,25 @@ bool AthleticController::control()
     }
 
     // TODO: introduce switch-case or if to switch the controller
-    mpc_stair_climbing_.updateSolution(t_, dt_, q, v);
-    const auto& u = mpc_stair_climbing_.getInitialControlInput();
-
-    // applies the inputs
-    for (int i=0; i<jointIds_.size(); ++i) {
-        ioBody_->joint(jointIds_[i])->u() = u.coeff(i);
+    if (mpc_inner_loop_count_ == 0) {
+        mpc_stair_climbing_.updateSolution(t_, dt_, q, v);
+        const auto& u = mpc_stair_climbing_.getInitialControlInput();
+        // applies the inputs
+        for (int i=0; i<jointIds_.size(); ++i) {
+            ioBody_->joint(jointIds_[i])->u() = u.coeff(i);
+        }
+        mpc_inner_loop_count_ = mpc_params_.sim_steps_per_mpc_update - 1;
     }
-
+    else {
+        const auto policy = mpc_stair_climbing_.getControlPolicy(t_);
+        const Eigen::VectorXd u = policy.tauJ - policy.Kp * (policy.qJ - q.tail(jointIds_.size()))
+                                              - policy.Kd * (policy.dqJ - v.tail(jointIds_.size()));
+        // applies the inputs
+        for (int i=0; i<jointIds_.size(); ++i) {
+            ioBody_->joint(jointIds_[i])->u() = u.coeff(i);
+        }
+        --mpc_inner_loop_count_;
+    }
     // std::cout << stair_climbing_foot_step_planner_ << std::endl;
 
     t_ += dt_;

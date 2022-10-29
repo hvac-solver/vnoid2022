@@ -50,7 +50,7 @@ void FastWalkingController::initMPC(const FastWalkingParams& walking_params, con
           0, 0, -0.5*walking_params.knee_angle, walking_params.knee_angle, -0.5*walking_params.knee_angle, 0, // left leg
           0, 0, -0.5*walking_params.knee_angle, walking_params.knee_angle, -0.5*walking_params.knee_angle, 0; // right leg
     robot.updateFrameKinematics(q0);
-    q0[2] = - 0.5 * (robot.framePosition("L_FOOT_R")[2] + robot.framePosition("R_FOOT_R")[2]);
+    q0[2] = - 0.5 * (robot.framePosition("L_FOOT_R")[2] + robot.framePosition("R_FOOT_R")[2]) + walking_params.height_offset;
     const Eigen::VectorXd v0 = Eigen::VectorXd::Zero(robot.dimv());
     robotoc::SolverOptions option_init;
     option_init.max_iter = 200;
@@ -102,6 +102,11 @@ bool FastWalkingController::initialize(cnoid::SimpleControllerIO* io)
     mpc_params.N = 25;
     mpc_params.iter = 1;
     mpc_params.nthreads = 6;
+    mpc_params.sim_steps_per_mpc_update = 2;
+
+    checkMPCParams(mpc_params);
+    mpc_params_ = mpc_params;
+
     initMPC(walking_params, mpc_params);
 
     return true;
@@ -110,6 +115,7 @@ bool FastWalkingController::initialize(cnoid::SimpleControllerIO* io)
 bool FastWalkingController::start()
 {
     t_ = 0.0;
+    mpc_inner_loop_count_ = mpc_params_.sim_steps_per_mpc_update - 1;
     return true;
 }
 
@@ -137,11 +143,24 @@ bool FastWalkingController::control()
     }
 
     // applies the MPC inputs
-    mpc_.updateSolution(t_, dt_, q, v);
-    const auto& u = mpc_.getInitialControlInput();
-
-    for (int i=0; i<jointIds_.size(); ++i) {
-        ioBody_->joint(jointIds_[i])->u() = u.coeff(i);
+    if (mpc_inner_loop_count_ == 0) {
+        mpc_.updateSolution(t_, dt_, q, v);
+        const auto& u = mpc_.getInitialControlInput();
+        // applies the inputs
+        for (int i=0; i<jointIds_.size(); ++i) {
+            ioBody_->joint(jointIds_[i])->u() = u.coeff(i);
+        }
+        mpc_inner_loop_count_ = mpc_params_.sim_steps_per_mpc_update - 1;
+    }
+    else {
+        const auto policy = mpc_.getControlPolicy(t_);
+        const Eigen::VectorXd u = policy.tauJ - policy.Kp * (policy.qJ - q.tail(jointIds_.size()))
+                                              - policy.Kd * (policy.dqJ - v.tail(jointIds_.size()));
+        // applies the inputs
+        for (int i=0; i<jointIds_.size(); ++i) {
+            ioBody_->joint(jointIds_[i])->u() = u.coeff(i);
+        }
+        --mpc_inner_loop_count_;
     }
 
     t_ += dt_;

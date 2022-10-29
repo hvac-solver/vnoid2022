@@ -49,6 +49,8 @@ private:
     // parameters
     double dt_;
     double t_;
+    MPCParams mpc_params_;
+    int mpc_inner_loop_count_;
 
     // MPC solvers
     robotoc::MPCBipedWalk mpc_stair_climbing_;

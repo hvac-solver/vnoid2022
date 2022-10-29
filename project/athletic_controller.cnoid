@@ -48,8 +48,8 @@ items:
           class: AISTSimulatorItem
           is_selected: true
           data: 
-            timeStep: 0.001
-            realtimeSync: true
+            timeStep: 0.0015
+            realtimeSync: false
             recording: "full"
             timeRangeMode: "Unlimited"
             timeLength: 180
