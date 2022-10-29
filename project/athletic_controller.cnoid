@@ -48,8 +48,8 @@ items:
           class: AISTSimulatorItem
           is_selected: true
           data: 
-            timeStep: 0.0025
-            realtimeSync: true
+            timeStep: 0.0015
+            realtimeSync: false
             recording: "full"
             timeRangeMode: "Unlimited"
             timeLength: 180
@@ -81,10 +81,11 @@ items:
           class: BodyItem
           is_checked: true
           data: 
-            file: "${SHARE}/model/sample_robot_description/body/sample_robot_ver2_reduced.body"
-            format: CHOREONOID-BODY
+            file: "${SHARE}/model/sample_robot_description/body/sample_robot_ver2_fixed_upper_body.body"
             currentBaseLink: "HIPS"
-            rootPosition: [ 0, 0, 0.8 ]
+            format: CHOREONOID-BODY
+            # rootPosition: [ 0, 0, 0.75 ]
+            rootPosition: [ 5.35, 1.5, 0.75 ]
             rootAttitude: [ 
               1, 0, 0, 
               0, 1, 0, 
@@ -92,13 +93,13 @@ items:
             jointDisplacements: [ 
               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-              -15, 30, -15, 0, 0, 0, -15, 30, -15, 0 ]
+              -30, 60, -30, 0, 0, 0, -30, 60, -30, 0 ]
             jointPositions: [ 
               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-              -15, 30, -15, 0, 0, 0, -15, 30, -15, 0 ]
-            # initialRootPosition: [ 0, 0, 0.8 ]
-            initialRootPosition: [ 5.35, 1.5, 0.8 ]
+              -30, 60, -30, 0, 0, 0, -30, 60, -30, 0 ]
+            # initialRootPosition: [ 0, 0, 0.75 ]
+            initialRootPosition: [ 5.35, 1.5, 0.75 ]
             initialRootAttitude: [ 
               1, 0, 0, 
               0, 1, 0, 
@@ -106,7 +107,7 @@ items:
             initialJointPositions: [ 
               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-              -15, 30, -15, 0, 0, 0, -15, 30, -15, 0 ]
+              -30, 60, -30, 0, 0, 0, -30, 60, -30, 0 ]
             staticModel: false
             collisionDetection: true
             selfCollisionDetection: false

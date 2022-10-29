@@ -7,6 +7,9 @@
 #include <cnoid/ExecutablePath>
 #include <cnoid/SimpleController>
 
+#include <robotoc/cost/periodic_com_ref.hpp>
+#include <robotoc/cost/periodic_swing_foot_ref.hpp>
+
 using cnoid::Matrix3;
 using cnoid::Vector3;
 using cnoid::Vector6;
@@ -15,24 +18,24 @@ using cnoid::VectorX;
 void AthleticController::initStairClimbingMPC(const StairClimbingParams& climbing_params, const MPCParams& mpc_params)
 {
     robotoc::RobotModelInfo model_info; 
-    model_info.urdf_path = cnoid::shareDir() + "/model/sample_robot_description/urdf/sample_robot_reduced.urdf";
+    // model_info.urdf_path = cnoid::shareDir() + "/model/sample_robot_description/urdf/sample_robot_reduced.urdf";
+    model_info.urdf_path = cnoid::shareDir() + "/model/sample_robot_description/urdf/sample_robot_fixed_upper_body.urdf";
     model_info.base_joint_type = robotoc::BaseJointType::FloatingBase;
-    // const double baumgarte_time_step = 0.05;
-    const double baumgarte_time_step = 0.1;
+    const double baumgarte_time_step = 0.05;
     model_info.surface_contacts = {robotoc::ContactModelInfo("L_FOOT_R", baumgarte_time_step),
                                    robotoc::ContactModelInfo("R_FOOT_R", baumgarte_time_step)};
     robotoc::Robot robot(model_info);
 
-    mpc_stair_climbing_ = robotoc::MPCBipedWalk(robot, mpc_params.T, mpc_params.N);
-
     stair_climbing_foot_step_planner_ = std::make_shared<robotoc::StairClimbingFootStepPlanner>(robot);
-    stair_climbing_foot_step_planner_->setGaitPattern(climbing_params.step_length, climbing_params.num_stair_steps);
+    const int num_extra_steps = 4;
+    stair_climbing_foot_step_planner_->setGaitPattern(climbing_params.step_length, climbing_params.num_stair_steps+num_extra_steps);
+
+    mpc_stair_climbing_ = robotoc::MPCBipedWalk(robot, mpc_params.T, mpc_params.N);
     mpc_stair_climbing_.setGaitPattern(stair_climbing_foot_step_planner_, climbing_params.step_height, 
                                        climbing_params.swing_time, climbing_params.double_support_time, climbing_params.swing_start_time);
 
     mpc_stair_climbing_.getConfigCostHandle()->set_u_weight(Eigen::VectorXd::Constant(robot.dimu(), 1.0e-03));
     mpc_stair_climbing_.getConfigCostHandle()->set_dv_weight_impact(Eigen::VectorXd::Constant(robot.dimv(), 1.0e-03));
-    mpc_stair_climbing_.getCoMCostHandle()->set_weight((Eigen::Vector3d() << 1.0e04, 1.0e04, 1.0e03).finished());
 
     const double X = 0.08;
     const double Y = 0.04;
@@ -41,15 +44,44 @@ void AthleticController::initStairClimbingMPC(const StairClimbingParams& climbin
 
     const double t0 = climbing_params.initial_time;
     Eigen::VectorXd q0(robot.dimq());
-    q0 << climbing_params.initial_base_position(0), climbing_params.initial_base_position(1), climbing_params.initial_base_position(2), // base position
+    q0 << climbing_params.initial_base_position(0), climbing_params.initial_base_position(1), 0, // base position
           0, 0, 0, 1, // base orientation
-          0, // left sholder
-          0, // right sholder
+        //   0, // left sholder
+        //   0, // right sholder
           0, 0, -0.5*climbing_params.knee_angle, climbing_params.knee_angle, -0.5*climbing_params.knee_angle, 0, // left leg
           0, 0, -0.5*climbing_params.knee_angle, climbing_params.knee_angle, -0.5*climbing_params.knee_angle, 0; // right leg
     robot.updateFrameKinematics(q0);
-    q0[2] = - 0.5 * (robot.framePosition("L_FOOT_R")[2] + robot.framePosition("R_FOOT_R")[2]);
+    q0[2] = - 0.5 * (robot.framePosition("L_FOOT_R")[2] + robot.framePosition("R_FOOT_R")[2]) + climbing_params.height_offset; // base height
     const Eigen::VectorXd v0 = Eigen::VectorXd::Zero(robot.dimv());
+
+    robot.updateFrameKinematics(q0);
+
+    // set swing foot refs
+    const Eigen::Vector3d L_foot_pos0 = robot.framePosition("L_FOOT_R");
+    const Eigen::Vector3d R_foot_pos0 = robot.framePosition("R_FOOT_R");
+    const double L_foot_t0 = climbing_params.swing_start_time + climbing_params.swing_time + climbing_params.double_support_time;
+    const double R_foot_t0 = climbing_params.swing_start_time;
+    auto L_foot_ref = std::make_shared<robotoc::PeriodicSwingFootRef>(L_foot_pos0, climbing_params.step_length, climbing_params.step_height, 
+                                                                      L_foot_t0, climbing_params.swing_time, 
+                                                                      climbing_params.swing_time+2.0*climbing_params.double_support_time, false);
+    auto R_foot_ref = std::make_shared<robotoc::PeriodicSwingFootRef>(R_foot_pos0, climbing_params.step_length, climbing_params.step_height, 
+                                                                      R_foot_t0, climbing_params.swing_time, 
+                                                                      climbing_params.swing_time+2.0*climbing_params.double_support_time, false);
+    mpc_stair_climbing_.getSwingFootCostHandle()[0]->set_ref(L_foot_ref);
+    mpc_stair_climbing_.getSwingFootCostHandle()[1]->set_ref(R_foot_ref);
+    mpc_stair_climbing_.getSwingFootCostHandle()[0]->set_weight(Eigen::Vector3d::Constant(1.0e03));
+    mpc_stair_climbing_.getSwingFootCostHandle()[1]->set_weight(Eigen::Vector3d::Constant(1.0e03));
+
+    // set CoM ref
+    Eigen::Vector3d com_ref0 = robot.CoM();
+    com_ref0[2] += climbing_params.height_offset;
+    const Eigen::Vector3d vcom_ref = 0.5 * climbing_params.step_length / climbing_params.swing_time;
+    auto com_ref = std::make_shared<robotoc::PeriodicCoMRef>(com_ref0, vcom_ref, 
+                                                             climbing_params.swing_start_time, 
+                                                             climbing_params.swing_time, climbing_params.double_support_time, false);
+    mpc_stair_climbing_.getCoMCostHandle()->set_ref(com_ref);
+    mpc_stair_climbing_.getCoMCostHandle()->set_weight((Eigen::Vector3d() << 1.0e04, 1.0e04, 1.0e03).finished());
+
     robotoc::SolverOptions option_init;
     option_init.max_iter = 200;
     option_init.nthreads = mpc_params.nthreads;
@@ -86,7 +118,8 @@ bool AthleticController::initialize(cnoid::SimpleControllerIO* io)
     }
 
     // gets the actuated joint ids
-    const auto actuatedJointNames = getActuatedJointNames();
+    // const auto actuatedJointNames = getActuatedJointNamesOfReducedModel();
+    const auto actuatedJointNames = getActuatedJointNamesOfFixedUpperBodyModel();
     jointIds_.clear();
     for (const auto& e : actuatedJointNames) {
         jointIds_.push_back(io->body()->joint(e.c_str())->jointId());
@@ -96,10 +129,14 @@ bool AthleticController::initialize(cnoid::SimpleControllerIO* io)
     StairClimbingParams stair_climbing_params;
     MPCParams mpc_params;
     mpc_params.T = 0.5;
-    // mpc_params.T = 0.7;
     mpc_params.N = 20;
     mpc_params.iter = 1;
-    mpc_params.nthreads = 6;
+    mpc_params.nthreads = 4;
+    mpc_params.sim_steps_per_mpc_update = 2;
+
+    checkMPCParams(mpc_params);
+    mpc_params_ = mpc_params;
+
     initStairClimbingMPC(stair_climbing_params, mpc_params);
 
     return true;
@@ -108,6 +145,7 @@ bool AthleticController::initialize(cnoid::SimpleControllerIO* io)
 bool AthleticController::start()
 {
     t_ = 0.0;
+    mpc_inner_loop_count_ = mpc_params_.sim_steps_per_mpc_update - 1;
     return true;
 }
 
@@ -135,14 +173,26 @@ bool AthleticController::control()
     }
 
     // TODO: introduce switch-case or if to switch the controller
-    // stair climbing 
-    mpc_stair_climbing_.updateSolution(t_, dt_, q, v);
-    const auto& u = mpc_stair_climbing_.getInitialControlInput();
-
-    // applies the inputs
-    for (int i=0; i<jointIds_.size(); ++i) {
-        ioBody_->joint(jointIds_[i])->u() = u.coeff(i);
+    if (mpc_inner_loop_count_ == 0) {
+        mpc_stair_climbing_.updateSolution(t_, dt_, q, v);
+        const auto& u = mpc_stair_climbing_.getInitialControlInput();
+        // applies the inputs
+        for (int i=0; i<jointIds_.size(); ++i) {
+            ioBody_->joint(jointIds_[i])->u() = u.coeff(i);
+        }
+        mpc_inner_loop_count_ = mpc_params_.sim_steps_per_mpc_update - 1;
     }
+    else {
+        const auto policy = mpc_stair_climbing_.getControlPolicy(t_);
+        const Eigen::VectorXd u = policy.tauJ - policy.Kp * (policy.qJ - q.tail(jointIds_.size()))
+                                              - policy.Kd * (policy.dqJ - v.tail(jointIds_.size()));
+        // applies the inputs
+        for (int i=0; i<jointIds_.size(); ++i) {
+            ioBody_->joint(jointIds_[i])->u() = u.coeff(i);
+        }
+        --mpc_inner_loop_count_;
+    }
+    // std::cout << stair_climbing_foot_step_planner_ << std::endl;
 
     t_ += dt_;
 

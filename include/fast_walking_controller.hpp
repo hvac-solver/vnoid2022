@@ -26,6 +26,7 @@ struct FastWalkingParams
     double swing_time = 0.6;
     double double_support_time = 0.0;
     double swing_start_time = 0.5;
+    double height_offset = 0.05;
 
     bool use_raibert = false;
     double raibert_gain = 0.7;
@@ -44,6 +45,8 @@ private:
     // parameters
     double dt_;
     double t_;
+    MPCParams mpc_params_;
+    int mpc_inner_loop_count_;
 
     // MPC solver
     robotoc::MPCBipedWalk mpc_;

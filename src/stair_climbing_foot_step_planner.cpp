@@ -13,7 +13,6 @@ StairClimbingFootStepPlanner::StairClimbingFootStepPlanner(const Robot& biped_ro
     robot_(biped_robot),
     L_foot_id_(biped_robot.surfaceContactFrames()[0]),
     R_foot_id_(biped_robot.surfaceContactFrames()[1]),
-    current_step_(0),
     left_to_right_leg_distance_(0),
     foot_height_to_com_height_(0),
     contact_placement_ref_(),
@@ -22,7 +21,6 @@ StairClimbingFootStepPlanner::StairClimbingFootStepPlanner(const Robot& biped_ro
     com_ref_(),
     R_(),
     step_length_(Eigen::Vector3d::Zero()),
-    R_current_(Eigen::Matrix3d::Identity()),
     enable_double_support_phase_(false),
     L_contact_active_(false), 
     R_contact_active_(false) {
@@ -45,8 +43,12 @@ void StairClimbingFootStepPlanner::setGaitPattern(const Eigen::Vector3d& step_le
                                                   const int num_stair_steps,
                                                   const bool enable_double_support_phase) {
   step_length_ = step_length;
-  planning_size_ = 2 * (num_stair_steps + 1);
+  planning_size_ = 2 * num_stair_steps;
   enable_double_support_phase_ = enable_double_support_phase;
+  if (enable_double_support_phase_) {
+    throw std::runtime_error(
+        "[StairClimbingFootStepPlanner] : the double support phase is not supported!");
+  }
 }
 
 
@@ -59,12 +61,9 @@ void StairClimbingFootStepPlanner::init(const Eigen::VectorXd& q) {
           R.transpose() * (robot_.framePosition(R_foot_id_)-q.template head<3>()) };
   left_to_right_leg_distance_ = contact_position_local[0].coeff(1)
                                   - contact_position_local[1].coeff(1);
-  const double foot_height = 0.5 * (robot_.framePosition(L_foot_id_).coeff(2)
-                                      + robot_.framePosition(R_foot_id_).coeff(2));
-  foot_height_to_com_height_ = robot_.CoM().coeff(2) - foot_height;
-  contact_position_ref_.clear();
-  contact_surface_ref_.clear();
-  current_step_ = 0;
+  // const double foot_height = 0.5 * (robot_.framePosition(L_foot_id_).coeff(2)
+  //                                     + robot_.framePosition(R_foot_id_).coeff(2));
+  // foot_height_to_com_height_ = robot_.CoM().coeff(2) - foot_height;
 
   aligned_vector<SE3> contact_placement, contact_placement_local;
   for (const auto frame : robot_.surfaceContactFrames()) {
@@ -74,72 +73,33 @@ void StairClimbingFootStepPlanner::init(const Eigen::VectorXd& q) {
         R.transpose() * (robot_.framePosition(frame) - q.template head<3>()));
   }
 
-  // plans all steps here
   if (enable_double_support_phase_) {
     throw std::runtime_error(
         "[StairClimbingFootStepPlanner] : the double support phase is not supported!");
   }
-  else {
-    contact_placement_ref_.clear();
-    contact_placement_ref_.push_back(contact_placement); // step -1
-    contact_placement_ref_.push_back(contact_placement); // step 0 
-    Eigen::Vector3d com = 0.5 * (contact_placement[0].translation() + contact_placement[1].translation());
-    com.coeffRef(2) += foot_height_to_com_height_;
-    com_ref_.clear();
-    com_ref_.push_back(com); // step -1
-    com_ref_.push_back(com); // step 0
 
-    // first 2 steps (on a blue plate)
-    contact_placement[1].translation().template head<2>().noalias() += 0.5 * step_length_.template head<2>();
-    contact_placement[1].translation().coeffRef(2) += step_length_.coeff(2);
-    contact_placement_ref_.push_back(contact_placement); // step 1
-    com.template head<2>().noalias() += 0.25 * step_length_.template head<2>();
-    com.coeffRef(2) += 0.5 * step_length_.coeff(2);
-    com_ref_.push_back(com); // step 1
+  // plans all steps here
+  contact_placement_ref_.clear();
+  contact_placement_ref_.push_back(contact_placement); // step -1
+  contact_placement_ref_.push_back(contact_placement); // step 0 
+  // Eigen::Vector3d com = 0.5 * (contact_placement[0].translation() + contact_placement[1].translation());
+  // com.coeffRef(2) += foot_height_to_com_height_;
+  Eigen::Vector3d com = robot_.CoM();
+  com_ref_.clear();
+  com_ref_.push_back(com); // step -1
+  com_ref_.push_back(com); // step 0
 
-    contact_placement[0].translation().noalias() += step_length_;
-    contact_placement_ref_.push_back(contact_placement); // step 2
-    com = 0.5 * (contact_placement[0].translation() + contact_placement[1].translation());
-    com.coeffRef(2) += foot_height_to_com_height_; 
-    com_ref_.push_back(com); // step 2
-
-    // next 3 steps
-    // const double offset = 0.05;
-    const double offset = 0.0;
-    contact_placement[1].translation().noalias() += step_length_;
-    contact_placement[1].translation().coeffRef(2) -= offset; // adjust the height
-    contact_placement_ref_.push_back(contact_placement); // step 1
-    com.noalias() += 0.5 * step_length_;
-    com_ref_.push_back(com); // step 1
-
-    contact_placement[0].translation().noalias() += step_length_;
-    contact_placement[0].translation().coeffRef(2) -= offset; // adjust the height
-    contact_placement_ref_.push_back(contact_placement); // step 2
-    com = 0.5 * (contact_placement[0].translation() + contact_placement[1].translation());
-    com.coeffRef(2) += foot_height_to_com_height_; 
-    com_ref_.push_back(com); // step 2
-
-    contact_placement[1].translation().noalias() += step_length_;
-    contact_placement[1].translation().coeffRef(2) -= offset; // adjust the height
-    contact_placement_ref_.push_back(contact_placement); // step 1
-    contact_placement_ref_.push_back(contact_placement); // step 1
-    com.noalias() += 0.5 * step_length_;
-    com_ref_.push_back(com); // step 1
-
-    for (int i=4; i<planning_size_; ++i) {
-      if (i%2 != 0) {
-        contact_placement[0].translation().noalias() += step_length_;
-      }
-      else {
-        contact_placement[1].translation().noalias() += step_length_;
-      }
-      contact_placement_ref_.push_back(contact_placement);
-      com.noalias() += 0.5 * step_length_;
-      com_ref_.push_back(com); 
+  for (int i=0; i<planning_size_; ++i) {
+    if (i%2 != 0) {
+      contact_placement[0].translation().noalias() += step_length_;
     }
+    else {
+      contact_placement[1].translation().noalias() += step_length_;
+    }
+    contact_placement_ref_.push_back(contact_placement);
+    com.noalias() += 0.5 * step_length_;
+    com_ref_.push_back(com); 
   }
-  L_contact_active_ = true;
-  R_contact_active_ = true;
 
   contact_position_ref_.clear();
   contact_surface_ref_.clear();
@@ -156,11 +116,8 @@ void StairClimbingFootStepPlanner::init(const Eigen::VectorXd& q) {
     R_.push_back(R);
   }
 
-  for (auto& e : com_ref_) {
-    e.coeffRef(2) += 0.1;
-  }
-
-  // std::cout << *this << std::endl;
+  L_contact_active_ = true;
+  R_contact_active_ = true;
 }
 
 

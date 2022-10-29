@@ -27,7 +27,7 @@ links:
         rotation: [0,1,0,0]
       -
         type: Shape
-        geometry: { type: Resource, uri: "Hips.stl" }
+        geometry: { type: Resource, uri: "../meshes/Hips.stl" }
         appearance: *MAT_LINK
   -
     name: CHEST_Y
@@ -40,7 +40,7 @@ links:
     jointRange: [-30, 30]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 5.0
     centerOfMass: [0, 0, 0]
     inertia: [0.02, 0, 0,  0, 0.02, 0,  0, 0, 0.02]
@@ -55,7 +55,7 @@ links:
         id: 0
       -
         type: Shape
-        geometry: { type: Resource, uri: "ChestY.stl" }
+        geometry: { type: Resource, uri: "../meshes/ChestY.stl" }
         appearance: *MAT_LINK
   -
     name: CHEST_P
@@ -68,14 +68,14 @@ links:
     jointRange: [-30, 70]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 5.0
     centerOfMass: [0, 0, 0]
     inertia: [0.02, 0, 0,  0, 0.02, 0,  0, 0, 0.02]
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "ChestP.stl" }
+        geometry: { type: Resource, uri: "../meshes/ChestP.stl" }
         appearance: *MAT_LINK
   -
     name: HEAD_Y
@@ -88,14 +88,14 @@ links:
     jointRange: [-90, 90]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 2.0
     centerOfMass: [0, 0, 0]
     inertia: [0.01, 0, 0,  0, 0.01, 0,  0, 0, 0.01]
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "HeadY.stl" }
+        geometry: { type: Resource, uri: "../meshes/HeadY.stl" }
         appearance: *MAT_LINK
   -
     name: HEAD_P
@@ -108,14 +108,14 @@ links:
     jointRange: [-30, 60]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 2.0
     centerOfMass: [0, 0, 0]
     inertia: [0.01, 0, 0,  0, 0.01, 0,  0, 0, 0.01]
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "HeadP.stl" }
+        geometry: { type: Resource, uri: "../meshes/HeadP.stl" }
         appearance: *MAT_LINK
   -
     name: R_UPPERARM_P
@@ -128,14 +128,14 @@ links:
     jointRange: [-180, 180]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 0.5
     centerOfMass: [0, 0, 0]
     inertia: [0.0004, 0, 0,  0, 0.0004, 0,  0, 0, 0.0004]
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "UpperarmP.stl" }
+        geometry: { type: Resource, uri: "../meshes/UpperarmP.stl" }
         appearance: *MAT_LINK
   -
     name: R_UPPERARM_R
@@ -148,14 +148,14 @@ links:
     jointRange: [-90, 90]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 0.5
     centerOfMass: [0, 0, 0]
     inertia: [0.0004, 0, 0,  0, 0.0004, 0,  0, 0, 0.0004]
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "UpperarmR.stl" }
+        geometry: { type: Resource, uri: "../meshes/UpperarmR.stl" }
         appearance: *MAT_LINK
   -
     name: R_UPPERARM_Y
@@ -168,14 +168,14 @@ links:
     jointRange: [-180, 180]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 1.0
     centerOfMass: [0, 0, -0.1]
     inertia: [0.002, 0, 0,  0, 0.002, 0,  0, 0, 0.0004]
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "UpperarmY.stl" }
+        geometry: { type: Resource, uri: "../meshes/UpperarmY.stl" }
         appearance: *MAT_LINK
 
   -
@@ -189,14 +189,14 @@ links:
     jointRange: [-150, 0]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 0.5
     centerOfMass: [0, 0, 0]
     inertia: [0.0004, 0, 0,  0, 0.0004, 0,  0, 0, 0.0004]
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "LowerarmP.stl" }
+        geometry: { type: Resource, uri: "../meshes/LowerarmP.stl" }
         appearance: *MAT_LINK
 
   -
@@ -210,14 +210,14 @@ links:
     jointRange: [-90, 90]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 1.0
     centerOfMass: [0, 0, -0.1]
     inertia: [0.002, 0, 0,  0, 0.002, 0,  0, 0, 0.0004]
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "LowerarmY.stl" }
+        geometry: { type: Resource, uri: "../meshes/LowerarmY.stl" }
         appearance: *MAT_LINK
   -
     name: R_HAND_P
@@ -230,14 +230,14 @@ links:
     jointRange: [-90, 90]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 0.5
     centerOfMass: [0, 0, 0]
     inertia: [0.0003, 0, 0,  0, 0.0003, 0,  0, 0, 0.0003]
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "HandP.stl" }
+        geometry: { type: Resource, uri: "../meshes/HandP.stl" }
         appearance: *MAT_LINK
   -
     name: R_HAND_R
@@ -250,14 +250,14 @@ links:
     jointRange: [-90, 90]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 0.5
     centerOfMass: [0, 0, 0]
     inertia: [0.0003, 0, 0,  0, 0.0003, 0,  0, 0, 0.0003]
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "HandR.stl" }
+        geometry: { type: Resource, uri: "../meshes/HandR.stl" }
         appearance: *MAT_LINK
   -
     name: L_UPPERARM_P
@@ -270,14 +270,14 @@ links:
     jointRange: [-180, 180]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 0.5
     centerOfMass: [0, 0, 0]
     inertia: [0.0004, 0, 0,  0, 0.0004, 0,  0, 0, 0.0004]
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "UpperarmP.stl" }
+        geometry: { type: Resource, uri: "../meshes/UpperarmP.stl" }
         appearance: *MAT_LINK
   -
     name: L_UPPERARM_R
@@ -290,14 +290,14 @@ links:
     jointRange: [-90, 90]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 0.5
     centerOfMass: [0, 0, 0]
     inertia: [0.0004, 0, 0,  0, 0.0004, 0,  0, 0, 0.0004]
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "UpperarmR.stl" }
+        geometry: { type: Resource, uri: "../meshes/UpperarmR.stl" }
         appearance: *MAT_LINK
   -
     name: L_UPPERARM_Y
@@ -310,14 +310,14 @@ links:
     jointRange: [-180, 180]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 1.0
     centerOfMass: [0, 0, -0.1]
     inertia: [0.002, 0, 0,  0, 0.002, 0,  0, 0, 0.0004]
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "UpperarmY.stl" }
+        geometry: { type: Resource, uri: "../meshes/UpperarmY.stl" }
         appearance: *MAT_LINK
   -
     name: L_LOWERARM_P
@@ -330,14 +330,14 @@ links:
     jointRange: [-150, 0]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 0.5
     centerOfMass: [0, 0, 0]
     inertia: [0.0004, 0, 0,  0, 0.0004, 0,  0, 0, 0.0004]
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "LowerarmP.stl" }
+        geometry: { type: Resource, uri: "../meshes/LowerarmP.stl" }
         appearance: *MAT_LINK
   -
     name: L_LOWERARM_Y
@@ -350,14 +350,14 @@ links:
     jointRange: [-90, 90]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 1.0
     centerOfMass: [0, 0, -0.1]
     inertia: [0.002, 0, 0,  0, 0.002, 0,  0, 0, 0.0004]
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "LowerarmY.stl" }
+        geometry: { type: Resource, uri: "../meshes/LowerarmY.stl" }
         appearance: *MAT_LINK
   -
     name: L_HAND_P
@@ -370,14 +370,14 @@ links:
     jointRange: [-90, 90]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 0.5
     centerOfMass: [0, 0, 0]
     inertia: [0.0003, 0, 0,  0, 0.0003, 0,  0, 0, 0.0003]
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "HandP.stl" }
+        geometry: { type: Resource, uri: "../meshes/HandP.stl" }
         appearance: *MAT_LINK
   -
     name: L_HAND_R
@@ -390,14 +390,14 @@ links:
     jointRange: [-90, 90]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
-    rotorInertia: 1.0
+    rotorInertia: 0.0
     mass: 0.5
     centerOfMass: [0, 0, 0]
     inertia: [0.0003, 0, 0,  0, 0.0003, 0,  0, 0, 0.0003]
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "HandR.stl" }
+        geometry: { type: Resource, uri: "../meshes/HandR.stl" }
         appearance: *MAT_LINK
   -
     name: R_UPPERLEG_Y
@@ -416,7 +416,7 @@ links:
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "UpperlegY.stl" }
+        geometry: { type: Resource, uri: "../meshes/UpperlegY.stl" }
         appearance: *MAT_LINK
   -
     name: R_UPPERLEG_R
@@ -435,7 +435,7 @@ links:
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "UpperlegR.stl" }
+        geometry: { type: Resource, uri: "../meshes/UpperlegR.stl" }
         appearance: *MAT_LINK
   -
     name: R_UPPERLEG_P
@@ -454,7 +454,7 @@ links:
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "UpperlegP.stl" }
+        geometry: { type: Resource, uri: "../meshes/UpperlegP.stl" }
         appearance: *MAT_LINK
   -
     name: R_LOWERLEG_P
@@ -473,7 +473,7 @@ links:
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "LowerlegP.stl" }
+        geometry: { type: Resource, uri: "../meshes/LowerlegP.stl" }
         appearance: *MAT_LINK
   -
     name: R_FOOT_P
@@ -492,7 +492,7 @@ links:
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "FootP.stl" }
+        geometry: { type: Resource, uri: "../meshes/FootP.stl" }
         appearance: *MAT_LINK
   -
     name: R_FOOT_R
@@ -518,7 +518,7 @@ links:
       -
         type: Visual
         resource:
-            uri: "FootR_flat.stl"
+            uri: "../meshes/FootR_flat.stl"
       -
         type: Collision
         elements:
@@ -543,7 +543,7 @@ links:
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "UpperlegY.stl" }
+        geometry: { type: Resource, uri: "../meshes/UpperlegY.stl" }
         appearance: *MAT_LINK
   -
     name: L_UPPERLEG_R
@@ -562,7 +562,7 @@ links:
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "UpperlegR.stl" }
+        geometry: { type: Resource, uri: "../meshes/UpperlegR.stl" }
         appearance: *MAT_LINK
   -
     name: L_UPPERLEG_P
@@ -581,7 +581,7 @@ links:
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "UpperlegP.stl" }
+        geometry: { type: Resource, uri: "../meshes/UpperlegP.stl" }
         appearance: *MAT_LINK
   -
     name: L_LOWERLEG_P
@@ -600,7 +600,7 @@ links:
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "LowerlegP.stl" }
+        geometry: { type: Resource, uri: "../meshes/LowerlegP.stl" }
         appearance: *MAT_LINK
   -
     name: L_FOOT_P
@@ -619,7 +619,7 @@ links:
     elements:
       -
         type: Shape
-        geometry: { type: Resource, uri: "FootP.stl" }
+        geometry: { type: Resource, uri: "../meshes/FootP.stl" }
         appearance: *MAT_LINK
   -
     name: L_FOOT_R
@@ -645,7 +645,7 @@ links:
       -
         type: Visual
         resource: 
-            uri: "FootR_flat.stl"
+            uri: "../meshes/FootR_flat.stl"
       -
         type: Collision
         elements:
