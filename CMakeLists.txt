@@ -16,6 +16,8 @@ endif()
 find_package(Eigen3 REQUIRED)
 # find robotoc
 find_package(robotoc REQUIRED)
+# find yaml-cpp
+find_package(yaml-cpp REQUIRED)
 
 # fast_walking_controller (for the shorttrack competition)
 choreonoid_add_simple_controller(
@@ -25,6 +27,7 @@ choreonoid_add_simple_controller(
 target_link_libraries(
   fast_walking_controller
   robotoc::robotoc 
+  yaml-cpp::yaml-cpp
 )
 target_include_directories(
   fast_walking_controller
@@ -43,6 +46,7 @@ choreonoid_add_simple_controller(
 target_link_libraries(
   athletic_controller
   robotoc::robotoc 
+  yaml-cpp::yaml-cpp
 )
 target_include_directories(
   athletic_controller
