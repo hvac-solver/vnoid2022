@@ -35,8 +35,8 @@ struct MPCParams
         if (nthreads < 0.0) {
             throw std::invalid_argument("MPCParams.nthreads must be positive!");
         }
-        if (iter < 0.0) {
-            throw std::invalid_argument("MPCParams.iter must be positive!");
+        if (iter < 0) {
+            throw std::invalid_argument("MPCParams.iter must be non-negative!");
         }
         if (sim_steps_per_mpc_update < 0.0) {
             throw std::invalid_argument("MPCParams.sim_steps_per_mpc_update must be positive!");

@@ -41,6 +41,7 @@ target_include_directories(
 choreonoid_add_simple_controller(
   athletic_controller
   src/stair_climbing_foot_step_planner.cpp
+  src/mpc_jump_com_ref.cpp
   src/athletic_controller.cpp
 )
 target_link_libraries(

@@ -154,7 +154,7 @@ links:
     jointId: 4
     jointAxis: [0,1,0]
     translation: [0.0, -0.1, 0.1]
-    rotation: [0.95803258, -0.03697159, 0.24462588, -0.14479246]
+    rotation: [1, 0, 0, 0]
     jointRange: [-180, 180]
     jointVelocityRange: [-540, 540]
     gearRatio: 1
@@ -340,7 +340,7 @@ links:
     jointId: 11
     jointAxis: [0,1,0]
     translation: [0.0,  0.1, 0.1]
-    rotation: [0.95803258, 0.03697159, 0.24462588, 0.14479246]
+    rotation: [1, 0, 0, 0]
     jointRange: [-180, 180]
     jointVelocityRange: [-540, 540]
     gearRatio: 1

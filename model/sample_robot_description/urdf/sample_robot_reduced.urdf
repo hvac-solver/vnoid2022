@@ -129,7 +129,7 @@
 
   <!-- Right Arm -->
   <joint name="R_UPPERARM_P" type="revolute">
-    <origin xyz="0.0 -0.1 0.1" rpy="-0.3 0.5 0.0"/>
+    <origin xyz="0.0 -0.1 0.1" rpy="0.0 0.0 0.0"/>
     <axis xyz="0 1 0"/>
     <parent link="CHEST_P"/>
     <child link="R_UPPERARM_P"/>
@@ -207,7 +207,7 @@
   </link>
 
   <joint name="R_LOWERARM_P" type="fixed">
-    <origin xyz="0.0 0.0 -0.2" rpy="0.0 -1.0 0.0"/>
+    <origin xyz="0.0 0.0 -0.2" rpy="0.0 0.0 0.0"/>
     <axis xyz="0 1 0"/>
     <parent link="R_UPPERARM_Y"/>
     <child link="R_LOWERARM_P"/>
@@ -313,7 +313,7 @@
 
   <!-- Left Arm -->
   <joint name="L_UPPERARM_P" type="revolute">
-    <origin xyz="0.0 0.1 0.1" rpy="0.3 0.5 0.0"/>
+    <origin xyz="0.0 0.1 0.1" rpy="0.0 0.0 0.0"/>
     <axis xyz="0 1 0"/>
     <parent link="CHEST_P"/>
     <child link="L_UPPERARM_P"/>
@@ -391,7 +391,7 @@
   </link>
 
   <joint name="L_LOWERARM_P" type="fixed">
-    <origin xyz="0.0 -8.32667268469e-17 -0.2" rpy="0.0 -1.0 0.0"/>
+    <origin xyz="0.0 -8.32667268469e-17 -0.2" rpy="0.0 0.0 0.0"/>
     <axis xyz="0 1 0"/>
     <parent link="L_UPPERARM_Y"/>
     <child link="L_LOWERARM_P"/>
