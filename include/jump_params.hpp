@@ -11,6 +11,7 @@ struct JumpParams
     double knee_angle = M_PI / 3.0;
 
     Eigen::Vector3d jump_length = {1.5, 0.0, -0.9}; 
+    double jump_height = 0.3;
 
     double flying_time = 0.5;
     double ground_time = 0.1;
@@ -28,6 +29,8 @@ struct JumpParams
             }
             jump_length = Eigen::Map<const Eigen::Vector3d>(jump_length_stdvec.data());
         }
+        if (config["jump_height"].IsDefined()) 
+            jump_height = config["jump_height"].as<double>();
         if (config["flying_time"].IsDefined()) 
             flying_time = config["flying_time"].as<double>();
         if (config["ground_time"].IsDefined()) 
@@ -47,6 +50,9 @@ struct JumpParams
         if (knee_angle < 0.0) {
             throw std::invalid_argument("JumpParams.knee_angle must be non-negative!");
         }
+        if (jump_height < 0.0) {
+            throw std::invalid_argument("JumpParams.jump_height must be non-negative!");
+        }
         if (flying_time <= 0.0) {
             throw std::invalid_argument("JumpParams.flying_time must be positive!");
         }
@@ -60,6 +66,7 @@ struct JumpParams
         os << "JumpParams: " << "\n";
         os << "  knee_angle:            " << jump_params.knee_angle << "\n";
         os << "  jump_length:           " << jump_params.jump_length.transpose() << "\n";
+        os << "  jump_height:           " << jump_params.jump_height << "\n";
         os << "  flying_time:           " << jump_params.flying_time << "\n";
         os << "  ground_time:           " << jump_params.ground_time << "\n";
         os << "  initial_time:          " << jump_params.initial_time << "\n";
