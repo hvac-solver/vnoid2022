@@ -272,11 +272,8 @@ bool AthleticController::control()
     }
     case ControlMode::Jump: {
         if (mpc_inner_loop_count_ == 0) {
-            const auto policy = mpc_jump_.getControlPolicy(t_);
-            const Eigen::VectorXd u = policy.tauJ;
-            // mpc_jump_.updateSolution(t_, dt_, q, v);
-            // const auto& u = mpc_jump_.getInitialControlInput();
-            // applies the inputs
+            mpc_jump_.updateSolution(t_, dt_, q, v);
+            const auto& u = mpc_jump_.getInitialControlInput();
             for (int i=0; i<jointIds_.size(); ++i) {
                 ioBody_->joint(jointIds_[i])->u() = u.coeff(i);
             }
@@ -284,11 +281,8 @@ bool AthleticController::control()
         }
         else {
             const auto policy = mpc_jump_.getControlPolicy(t_);
-            const Eigen::VectorXd u = policy.tauJ;
-            // const Eigen::VectorXd u = policy.tauJ - policy.Kp * (policy.qJ - q.tail(jointIds_.size()))
-            //                                       - policy.Kd * (policy.dqJ - v.tail(jointIds_.size()));
-            std::cout << "u: " << u.transpose() << std::endl;
-            // applies the inputs
+            const Eigen::VectorXd u = policy.tauJ - policy.Kp * (policy.qJ - q.tail(jointIds_.size()))
+                                                  - policy.Kd * (policy.dqJ - v.tail(jointIds_.size()));
             for (int i=0; i<jointIds_.size(); ++i) {
                 ioBody_->joint(jointIds_[i])->u() = u.coeff(i);
             }
