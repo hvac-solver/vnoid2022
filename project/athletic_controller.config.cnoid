@@ -29,6 +29,6 @@ jump_params:
 mpc_jump_params:
   T: 1.5
   N: 50
-  iter: 2
+  iter: 0
   nthreads: 4
-  sim_steps_per_mpc_update: 5
+  sim_steps_per_mpc_update: 1000

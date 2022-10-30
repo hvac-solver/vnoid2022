@@ -20,8 +20,8 @@ using cnoid::VectorX;
 void AthleticController::initMPCStairClimbing(const StairClimbingParams& climbing_params, const MPCParams& mpc_params)
 {
     robotoc::RobotModelInfo model_info; 
-    // model_info.urdf_path = cnoid::shareDir() + "/model/sample_robot_description/urdf/sample_robot_reduced.urdf";
-    model_info.urdf_path = cnoid::shareDir() + "/model/sample_robot_description/urdf/sample_robot_fixed_upper_body.urdf";
+    model_info.urdf_path = cnoid::shareDir() + "/model/sample_robot_description/urdf/sample_robot_reduced.urdf";
+    // model_info.urdf_path = cnoid::shareDir() + "/model/sample_robot_description/urdf/sample_robot_fixed_upper_body.urdf";
     model_info.base_joint_type = robotoc::BaseJointType::FloatingBase;
     const double baumgarte_time_step = 0.05;
     model_info.surface_contacts = {robotoc::ContactModelInfo("L_FOOT_R", baumgarte_time_step),
@@ -52,8 +52,8 @@ void AthleticController::initMPCStairClimbing(const StairClimbingParams& climbin
     Eigen::VectorXd q0(robot.dimq());
     q0 << climbing_params.initial_base_position(0), climbing_params.initial_base_position(1), 0, // base position
           0, 0, 0, 1, // base orientation
-        //   0, // left sholder
-        //   0, // right sholder
+          0, // left sholder
+          0, // right sholder
           0, 0, -0.5*climbing_params.knee_angle, climbing_params.knee_angle, -0.5*climbing_params.knee_angle, 0, // left leg
           0, 0, -0.5*climbing_params.knee_angle, climbing_params.knee_angle, -0.5*climbing_params.knee_angle, 0; // right leg
     robot.updateFrameKinematics(q0);
@@ -74,8 +74,8 @@ void AthleticController::initMPCStairClimbing(const StairClimbingParams& climbin
 void AthleticController::initMPCJump(const JumpParams& jump_params, const MPCParams& mpc_params)
 {
     robotoc::RobotModelInfo model_info; 
-    // model_info.urdf_path = cnoid::shareDir() + "/model/sample_robot_description/urdf/sample_robot_reduced.urdf";
-    model_info.urdf_path = cnoid::shareDir() + "/model/sample_robot_description/urdf/sample_robot_fixed_upper_body.urdf";
+    model_info.urdf_path = cnoid::shareDir() + "/model/sample_robot_description/urdf/sample_robot_reduced.urdf";
+    // model_info.urdf_path = cnoid::shareDir() + "/model/sample_robot_description/urdf/sample_robot_fixed_upper_body.urdf";
     model_info.base_joint_type = robotoc::BaseJointType::FloatingBase;
     const double baumgarte_time_step = 0.05;
     model_info.surface_contacts = {robotoc::ContactModelInfo("L_FOOT_R", baumgarte_time_step),
@@ -89,6 +89,8 @@ void AthleticController::initMPCJump(const JumpParams& jump_params, const MPCPar
     mpc_jump_.setJumpPattern(jump_foot_step_planner_, jump_params.flying_time, jump_params.flying_time, 
                              jump_params.ground_time, jump_params.ground_time);
 
+    mpc_jump_.getConfigCostHandle()->set_u_weight(Eigen::VectorXd::Constant(robot.dimu(), 1.0e-03));
+
     const double X = 0.08;
     const double Y = 0.04;
     mpc_jump_.getContactWrenchConeHandle()->setRectangular(X, Y);
@@ -98,15 +100,18 @@ void AthleticController::initMPCJump(const JumpParams& jump_params, const MPCPar
     Eigen::VectorXd q0(robot.dimq());
     q0 << jump_params.initial_base_position(0), jump_params.initial_base_position(1), jump_params.initial_base_position(2), // base position
           0, 0, 0, 1, // base orientation
-        //   0, // left sholder
-        //   0, // right sholder
+          0, // left sholder
+          0, // right sholder
           0, 0, -0.5*jump_params.knee_angle, jump_params.knee_angle, -0.5*jump_params.knee_angle, 0, // left leg
           0, 0, -0.5*jump_params.knee_angle, jump_params.knee_angle, -0.5*jump_params.knee_angle, 0; // right leg
     const Eigen::VectorXd v0 = Eigen::VectorXd::Zero(robot.dimv());
 
     robotoc::SolverOptions option_init;
-    option_init.max_iter = 200;
+    option_init.max_iter = 500;
     option_init.nthreads = mpc_params.nthreads;
+    option_init.enable_line_search = true;
+    option_init.line_search_settings.line_search_method = robotoc::LineSearchMethod::MeritBacktracking;
+    option_init.line_search_settings.min_step_size = 1.0e-03;
     mpc_jump_.init(t0, q0, v0, option_init);
 
     robotoc::SolverOptions option_mpc;
@@ -140,8 +145,8 @@ bool AthleticController::initialize(cnoid::SimpleControllerIO* io)
     }
 
     // gets the actuated joint ids
-    // const auto actuatedJointNames = getActuatedJointNamesOfReducedModel();
-    const auto actuatedJointNames = getActuatedJointNamesOfFixedUpperBodyModel();
+    const auto actuatedJointNames = getActuatedJointNamesOfReducedModel();
+    // const auto actuatedJointNames = getActuatedJointNamesOfFixedUpperBodyModel();
     jointIds_.clear();
     for (const auto& e : actuatedJointNames) {
         jointIds_.push_back(io->body()->joint(e.c_str())->jointId());
