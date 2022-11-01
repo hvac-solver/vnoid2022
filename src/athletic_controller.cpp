@@ -91,11 +91,9 @@ void AthleticController::initMPCJump(const JumpParams& jump_params, const MPCPar
     mpc_jump_.setJumpPattern(jump_foot_step_planner_, jump_params.flying_time, jump_params.flying_time, 
                              jump_params.ground_time, jump_params.ground_time);
 
-    mpc_jump_.getConfigCostHandle()->set_u_weight(Eigen::VectorXd::Constant(robot.dimu(), 1.0e-03));
-
-    const double X = 0.08;
-    const double Y = 0.04;
-    mpc_jump_.getContactWrenchConeHandle()->setRectangular(X, Y);
+    // const double X = 0.08;
+    // const double Y = 0.04;
+    // mpc_jump_.getContactWrenchConeHandle()->setRectangular(X, Y);
     // mpc_jump_.getImpactWrenchConeHandle()->setRectangular(X, Y);
 
     const double t0 = jump_params.initial_time;
@@ -109,16 +107,22 @@ void AthleticController::initMPCJump(const JumpParams& jump_params, const MPCPar
     const Eigen::VectorXd v0 = Eigen::VectorXd::Zero(robot.dimv());
 
     auto config_cost = mpc_jump_.getConfigCostHandle();
-    Eigen::VectorXd q_weight = Eigen::VectorXd::Constant(robot.dimv(), 0.01);
-    q_weight.template head<6>() << 0, 0, 0, 100, 100, 100;
-    Eigen::VectorXd q_weight_impact = Eigen::VectorXd::Constant(robot.dimv(), 10);
-    q_weight_impact.template head<6>() << 0, 0, 0, 1000, 1000, 1000;
+    Eigen::VectorXd q_weight(robot.dimv());
+    q_weight << 0, 0, 0, 100, 100, 100,
+                0.01, 0.01,
+                100, 0.01, 0.01, 0.01, 0.01, 0.01,
+                100, 0.01, 0.01, 0.01, 0.01, 0.01;
+    Eigen::VectorXd q_weight_impact(robot.dimv());
+    q_weight_impact << 0, 0, 0, 1000, 1000, 1000, 
+                       10, 10,
+                       10, 10, 10, 10, 10, 10,
+                       10, 10, 10, 10, 10, 10;
     config_cost->set_q_weight(q_weight);
     config_cost->set_q_weight_terminal(q_weight);
     config_cost->set_q_weight_impact(q_weight_impact);
     config_cost->set_v_weight(Eigen::VectorXd::Constant(robot.dimv(), 1.0));
     config_cost->set_v_weight_terminal(Eigen::VectorXd::Constant(robot.dimv(), 1.0));
-    config_cost->set_u_weight(Eigen::VectorXd::Constant(robot.dimu(), 1.0e-03));
+    config_cost->set_u_weight(Eigen::VectorXd::Constant(robot.dimu(), 1.0e-02));
     config_cost->set_a_weight(Eigen::VectorXd::Constant(robot.dimv(), 0.0));
     config_cost->set_v_weight_impact(Eigen::VectorXd::Constant(robot.dimv(), 10.0));
     config_cost->set_dv_weight_impact(Eigen::VectorXd::Constant(robot.dimv(), 0.0));
@@ -129,12 +133,10 @@ void AthleticController::initMPCJump(const JumpParams& jump_params, const MPCPar
     com_ref->setCoMRef(robot.CoM(), jump_params.jump_length, jump_params.jump_height);
     auto com_cost = std::make_shared<robotoc::CoMCost>(robot, com_ref);
     com_cost->set_weight(Eigen::Vector3d::Constant(1.0e03));
-    com_cost->set_weight_terminal(Eigen::Vector3d::Constant(1.0e03));
-    com_cost->set_weight_impact(Eigen::Vector3d::Constant(1.0e03));
-    mpc_jump_.getCostFunctionHangle()->push_back(com_cost);
+    mpc_jump_.getCostHandle()->add("com_cost", com_cost);
 
     robotoc::SolverOptions option_init;
-    option_init.max_iter = 100;
+    option_init.max_iter = 200;
     option_init.nthreads = mpc_params.nthreads;
     option_init.enable_line_search = true;
     option_init.line_search_settings.line_search_method = robotoc::LineSearchMethod::MeritBacktracking;
@@ -144,6 +146,9 @@ void AthleticController::initMPCJump(const JumpParams& jump_params, const MPCPar
     robotoc::SolverOptions option_mpc;
     option_mpc.max_iter = mpc_params.iter;
     option_mpc.nthreads = mpc_params.nthreads;
+    option_mpc.enable_line_search = true;
+    option_mpc.line_search_settings.line_search_method = robotoc::LineSearchMethod::MeritBacktracking;
+    option_mpc.line_search_settings.min_step_size = 1.0e-03;
     mpc_jump_.setSolverOptions(option_mpc);
 }
 
@@ -281,8 +286,9 @@ bool AthleticController::control()
         }
         else {
             const auto policy = mpc_jump_.getControlPolicy(t_);
-            const Eigen::VectorXd u = policy.tauJ - policy.Kp * (policy.qJ - q.tail(jointIds_.size()))
-                                                  - policy.Kd * (policy.dqJ - v.tail(jointIds_.size()));
+            // const Eigen::VectorXd u = policy.tauJ - policy.Kp * (policy.qJ - q.tail(jointIds_.size()))
+            //                                       - policy.Kd * (policy.dqJ - v.tail(jointIds_.size()));
+            const Eigen::VectorXd u = policy.tauJ;
             for (int i=0; i<jointIds_.size(); ++i) {
                 ioBody_->joint(jointIds_[i])->u() = u.coeff(i);
             }
