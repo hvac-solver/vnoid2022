@@ -22,14 +22,14 @@ jump_params:
   knee_angle: 1.0471975511965976 # M_PI / 3
   jump_length: [1.5, 0, -0.8]
   jump_height: 0.3
-  flying_time: 0.5
-  groud_time: 0.1
+  flying_time: 0.45
+  groud_time: 0.5
   initial_time: 0.0
   initial_base_position: [10.9, 1.5, 3.55] 
 
 mpc_jump_params:
-  T: 0.9
+  T: 1.0
   N: 20
-  iter: 0
+  iter: 1
   nthreads: 4
-  sim_steps_per_mpc_update: 1
+  sim_steps_per_mpc_update: 2
