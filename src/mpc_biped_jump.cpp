@@ -101,24 +101,21 @@ void MPCBipedJump::setJumpPattern(
     const std::shared_ptr<ContactPlannerBase>& foot_step_planner, 
     const double jump_height, const double ground_time, const double flying_up_time, 
     const double flying_time, const double landing_time) {
-  // if (flying_time <= 0) {
-  //   throw std::out_of_range("[MPCBipedJump] invalid argument: 'flying_time' must be positive!");
-  // }
-  // if (min_flying_time <= 0) {
-  //   throw std::out_of_range("[MPCBipedJump] invalid argument: 'min_flying_time' must be positive!");
-  // }
-  // if (ground_time <= 0) {
-  //   throw std::out_of_range("[MPCBipedJump] invalid argument: 'ground_time' must be positive!");
-  // }
-  // if (min_ground_time <= 0) {
-  //   throw std::out_of_range("[MPCBipedJump] invalid argument: 'min_ground_time' must be positive!");
-  // }
-  // if (flying_time+ground_time > T_) {
-  //   throw std::out_of_range("[MPCBipedJump] invalid argument: 'flying_time' + 'ground_time' must be less than T!");
-  // }
-  // if (min_flying_time+min_ground_time > T_) {
-  //   throw std::out_of_range("[MPCBipedJump] invalid argument: 'min_flying_time' + 'min_ground_time' must be less than T!");
-  // }
+  if (jump_height < 0) {
+    throw std::out_of_range("[MPCBipedJump] invalid argument: 'jump_height' must be non-negative!");
+  }
+  if (ground_time <= 0) {
+    throw std::out_of_range("[MPCBipedJump] invalid argument: 'ground_time' must be positive!");
+  }
+  if (flying_up_time <= 0) {
+    throw std::out_of_range("[MPCBipedJump] invalid argument: 'flying_up_time' must be positive!");
+  }
+  if (flying_time <= 0) {
+    throw std::out_of_range("[MPCBipedJump] invalid argument: 'flying_time' must be positive!");
+  }
+  if (landing_time <= 0) {
+    throw std::out_of_range("[MPCBipedJump] invalid argument: 'landing_time' must be positive!");
+  }
   foot_step_planner_ = foot_step_planner;
   jump_height_ = jump_height;
   ground_time_ = ground_time;
@@ -170,8 +167,6 @@ void MPCBipedJump::init(const double t, const Eigen::VectorXd& q,
   cost_->add("L_foot_cost", L_foot_cost_);
   cost_->add("R_foot_cost", R_foot_cost_);
 
-  // L_foot_rot_cost_->set_weight(Eigen::Vector3d::Zero(), Eigen::Vector3d::Constant(1.0e02));
-  // R_foot_rot_cost_->set_weight(Eigen::Vector3d::Zero(), Eigen::Vector3d::Constant(1.0e02));
   L_foot_rot_cost_->set_weight(Eigen::Vector3d::Constant(1.0e01), Eigen::Vector3d::Zero());
   R_foot_rot_cost_->set_weight(Eigen::Vector3d::Constant(1.0e01), Eigen::Vector3d::Zero());
   cost_->add("L_foot_rot_cost", L_foot_rot_cost_);
