@@ -11,6 +11,7 @@ struct JumpParams
     double knee_angle = M_PI / 3.0;
 
     Eigen::Vector3d jump_length = {1.5, 0.0, -0.9}; 
+    Eigen::Vector3d step_length = {0.5, 0.0,  0.0}; 
     double jump_height = 0.3;
 
     double ground_time = 0.3;
@@ -30,6 +31,13 @@ struct JumpParams
                 throw std::invalid_argument("[JumpParams::loadFromYAML] jump_length.size() must be 3!");
             }
             jump_length = Eigen::Map<const Eigen::Vector3d>(jump_length_stdvec.data());
+        }
+        if (config["step_length"].IsDefined()) {
+            const auto step_length_stdvec = config["step_length"].as<std::vector<double>>();
+            if (step_length_stdvec.size() != 3) {
+                throw std::invalid_argument("[JumpParams::loadFromYAML] step_length.size() must be 3!");
+            }
+            step_length = Eigen::Map<const Eigen::Vector3d>(step_length_stdvec.data());
         }
         if (config["jump_height"].IsDefined()) 
             jump_height = config["jump_height"].as<double>();
@@ -78,6 +86,7 @@ struct JumpParams
         os << "JumpParams: " << "\n";
         os << "  knee_angle:            " << jump_params.knee_angle << "\n";
         os << "  jump_length:           " << jump_params.jump_length.transpose() << "\n";
+        os << "  step_length:           " << jump_params.step_length.transpose() << "\n";
         os << "  jump_height:           " << jump_params.jump_height << "\n";
         os << "  ground_time:           " << jump_params.ground_time << "\n";
         os << "  flying_up_time:        " << jump_params.flying_up_time << "\n";

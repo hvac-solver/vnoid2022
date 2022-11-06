@@ -92,7 +92,7 @@ void AthleticController::initMPCJump(const JumpParams& jump_params, const MPCPar
     //                          jump_params.ground_time, jump_params.ground_time);
 
     jump_foot_step_planner_ = std::make_shared<robotoc::BipedJumpFootStepPlanner>(robot);
-    jump_foot_step_planner_->setJumpPattern(jump_params.jump_length, 0);
+    jump_foot_step_planner_->setJumpPattern(jump_params.jump_length, jump_params.step_length, 0);
 
     mpc_jump_ = robotoc::MPCBipedJump(robot, mpc_params.T, mpc_params.N);
     mpc_jump_.setJumpPattern(jump_foot_step_planner_, jump_params.jump_height, 

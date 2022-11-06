@@ -22,6 +22,7 @@ BipedJumpFootStepPlanner::BipedJumpFootStepPlanner(const Robot& biped_robot)
     com_to_contact_position_local_(),
     R_(),
     jump_length_(Eigen::Vector3d::Zero()),
+    step_length_(Eigen::Vector3d::Zero()),
     R_yaw_(Eigen::Matrix3d::Identity()),
     L_contact_active_(false), 
     R_contact_active_(false) {
@@ -41,8 +42,10 @@ BipedJumpFootStepPlanner::~BipedJumpFootStepPlanner() {
 
 
 void BipedJumpFootStepPlanner::setJumpPattern(const Eigen::Vector3d& jump_length,
+                                              const Eigen::Vector3d& step_length,
                                               const double step_yaw) {
   jump_length_ = jump_length;
+  step_length_ = step_length;
   R_yaw_ << std::cos(step_yaw), -std::sin(step_yaw), 0, 
           std::sin(step_yaw), std::cos(step_yaw),  0,
           0, 0, 1;
@@ -76,6 +79,8 @@ void BipedJumpFootStepPlanner::init(const Eigen::VectorXd& q) {
         q.template head<3>() + R_goal * contact_placement_local[i].translation()
                              + R_yaw_ * jump_length_);
   }
+  contact_placement_goal[1].translation() += R_yaw_ * step_length_;
+
   contact_placement_ref_.clear();
   contact_placement_ref_.push_back(contact_placement);
   contact_placement_ref_.push_back(contact_placement);

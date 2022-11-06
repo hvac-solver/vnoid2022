@@ -62,9 +62,11 @@ public:
   ///
   /// @brief Sets the gait pattern by step length and yaw step command. 
   /// @param[in] jump_length Length of the jump. 
+  /// @param[in] step_length Length of the jump. 
   /// @param[in] jump_yaw Change in the yaw angle of the jump. 
   ///
-  void setJumpPattern(const Eigen::Vector3d& jump_length, const double jump_yaw);
+  void setJumpPattern(const Eigen::Vector3d& jump_length, 
+                      const Eigen::Vector3d& step_length, const double jump_yaw);
 
   void init(const Eigen::VectorXd& q) override;
 
@@ -107,7 +109,7 @@ private:
   std::deque<std::vector<Eigen::Matrix3d>> contact_surface_ref_;
   std::deque<Eigen::Vector3d> com_ref_, com_to_contact_position_local_;
   std::deque<Eigen::Matrix3d> R_;
-  Eigen::Vector3d jump_length_;
+  Eigen::Vector3d jump_length_, step_length_;
   Eigen::Matrix3d R_yaw_;
   bool L_contact_active_, R_contact_active_;
 
