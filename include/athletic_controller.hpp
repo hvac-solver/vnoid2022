@@ -5,8 +5,8 @@
 #include <cnoid/SimpleController>
 
 #include <robotoc/mpc/mpc_biped_walk.hpp>
-#include <robotoc/mpc/mpc_jump.hpp>
-#include <robotoc/mpc/jump_foot_step_planner.hpp>
+// #include <robotoc/mpc/mpc_jump.hpp>
+// #include <robotoc/mpc/jump_foot_step_planner.hpp>
 
 #include "athletic_controller.hpp"
 
@@ -22,6 +22,8 @@
 #include "jump_params.hpp"
 
 #include "stair_climbing_foot_step_planner.hpp"
+#include "biped_jump_foot_step_planner.hpp"
+#include "mpc_biped_jump.hpp"
 
 
 class AthleticController : public cnoid::SimpleController
@@ -48,8 +50,10 @@ private:
     // MPC solvers
     robotoc::MPCBipedWalk mpc_stair_climbing_;
     std::shared_ptr<robotoc::StairClimbingFootStepPlanner> stair_climbing_foot_step_planner_;
-    robotoc::MPCJump mpc_jump_;
-    std::shared_ptr<robotoc::JumpFootStepPlanner> jump_foot_step_planner_;
+    // robotoc::MPCJump mpc_jump_;
+    // std::shared_ptr<robotoc::JumpFootStepPlanner> jump_foot_step_planner_;
+    robotoc::MPCBipedJump mpc_jump_;
+    std::shared_ptr<robotoc::BipedJumpFootStepPlanner> jump_foot_step_planner_;
 
     void initMPCStairClimbing(const StairClimbingParams& stair_climbing_params, const MPCParams& mpc_params);
     void initMPCJump(const JumpParams& jump_params, const MPCParams& mpc_params);
