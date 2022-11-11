@@ -1,3 +1,12 @@
+# Humanoid Virtual Athletics Challenge 2022 
+(https://ytazz.github.io/vnoid/)
+
+https://user-images.githubusercontent.com/33686357/201346741-d634b8d7-6eb0-418b-9cd0-23744085fab6.mp4
+
+
+https://user-images.githubusercontent.com/33686357/201346835-3bec8c74-da74-4d58-b12a-4f3f405c0892.mp4
+
+
 ## Build 
 ```
 mkdir -p CNOID_WS/src && cd CNOID_WS/src
